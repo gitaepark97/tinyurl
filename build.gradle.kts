@@ -83,4 +83,28 @@ tasks.test {
 tasks.asciidoctor {
     inputs.dir(project.extra["snippetsDir"]!!)
     dependsOn(tasks.test)
+    baseDirFollowsSourceFile()
+    attributes(mapOf("snippets" to project.extra["snippetsDir"]))
+}
+
+// asciidoctor는 test 결과(RestDocs 스니펫)가 있어야 하고, test는 classes(컴파일 결과 +
+// processResources 산출물)가 있어야 하므로, 문서를 processResources의 산출물 디렉터리
+// (build/resources/main)에 다시 섞어 넣으면 항상 순환 의존성이 생긴다. 그래서 문서는
+// 완전히 독립된 디렉터리에 모아두고, bootJar가 패키징 시점에 그 디렉터리를
+// BOOT-INF/classes/static/docs 위치로 직접 포함시킨다(Boot이 static 리소스를 읽는 경로).
+tasks.register<Copy>("copyDocs") {
+    dependsOn(tasks.asciidoctor)
+    from(tasks.asciidoctor.get().outputDir)
+    into(layout.buildDirectory.dir("generated-docs"))
+}
+
+// bootRun/IDE 실행은 이 문서를 보지 않는다(빌드된 jar가 아니라 컴파일된 클래스를 그대로
+// 띄우는 방식이라 bootJar 패키징 단계 자체를 안 거치기 때문). API 문서 확인은 항상
+// jar를 빌드해서 실행하는 것으로 통일한다 — src 트리에 복사하는 방식은 순서 문제와
+// bootJar 중복 문제를 같이 끌고 와서 배보다 배꼽이 컸다.
+tasks.bootJar {
+    dependsOn("copyDocs")
+    into("BOOT-INF/classes/static/docs") {
+        from(layout.buildDirectory.dir("generated-docs"))
+    }
 }
