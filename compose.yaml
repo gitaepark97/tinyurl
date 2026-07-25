@@ -1,16 +1,23 @@
 services:
+  mysql:
+    image: 'mysql:8.4.10'
+    container_name: 'tinyurl-mysql'
+    environment:
+      - 'MYSQL_DATABASE=tinyurl'
+      - 'MYSQL_USER=tinyurl'
+      - 'MYSQL_PASSWORD=tinyurl'
+      - 'MYSQL_ROOT_PASSWORD=tinyurl-root'
+    ports:
+      - '3306:3306'
+    volumes:
+      - 'mysql-data:/var/lib/mysql'
   grafana-lgtm:
-    image: 'grafana/otel-lgtm:latest'
+    image: 'grafana/otel-lgtm:0.29.2'
+    container_name: 'tinyurl-grafana-lgtm'
     ports:
       - '3000:3000'
-      - '4317'
-      - '4318'
-  mysql:
-    image: 'mysql:latest'
-    environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
-    ports:
-      - '3306'
+      - '4317:4317'
+      - '4318:4318'
+
+volumes:
+  mysql-data:

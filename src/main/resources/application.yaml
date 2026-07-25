@@ -1,3 +1,6 @@
 spring:
   application:
     name: tinyurl
+  docker:
+    compose:
+      lifecycle-management: start-only
