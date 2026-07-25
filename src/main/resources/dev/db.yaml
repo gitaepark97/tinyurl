@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/tinyurl}
+    username: ${DB_USERNAME:tinyurl}
+    password: ${DB_PASSWORD:tinyurl}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
