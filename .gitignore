@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### k6 ###
+# k6-report skill이 커밋된 JSON에서 매번 재생성하는 파생 산출물이라 커밋하지 않는다.
+k6/reports/**/*.html
