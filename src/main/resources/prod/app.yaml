@@ -1,0 +1,3 @@
+app:
+  short-url:
+    base-url: ${SHORT_URL_BASE_URL}

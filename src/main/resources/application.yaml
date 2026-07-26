@@ -7,6 +7,7 @@ spring:
     import:
       - optional:${spring.profiles.active}/db.yaml
       - optional:${spring.profiles.active}/management.yaml
+      - optional:${spring.profiles.active}/app.yaml
 
 ---
 spring:

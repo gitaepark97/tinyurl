@@ -6,4 +6,25 @@
 :toclevels: 2
 :sectlinks:
 
-아직 문서화된 API가 없습니다.
+== 단축 URL 생성
+
+include::{snippets}/short-url-create/http-request.adoc[]
+include::{snippets}/short-url-create/request-fields.adoc[]
+include::{snippets}/short-url-create/http-response.adoc[]
+include::{snippets}/short-url-create/response-fields.adoc[]
+
+=== 실패: 잘못된 URL
+
+include::{snippets}/short-url-create-invalid/http-request.adoc[]
+include::{snippets}/short-url-create-invalid/http-response.adoc[]
+include::{snippets}/short-url-create-invalid/response-fields.adoc[]
+
+== 단축 URL 리다이렉트
+
+include::{snippets}/short-url-redirect/http-request.adoc[]
+include::{snippets}/short-url-redirect/http-response.adoc[]
+
+=== 실패: 존재하지 않거나 만료된 키
+
+include::{snippets}/short-url-redirect-not-found/http-request.adoc[]
+include::{snippets}/short-url-redirect-not-found/http-response.adoc[]
