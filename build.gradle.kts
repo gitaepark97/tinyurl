@@ -39,6 +39,9 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     runtimeOnly("com.mysql:mysql-connector-j")
 
+    // 로컬 캐시
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
     // Observability: Actuator + Log4j2 + OpenTelemetry(LGTM 스택 연동)
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-log4j2")

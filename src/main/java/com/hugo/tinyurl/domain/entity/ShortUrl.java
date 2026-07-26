@@ -41,8 +41,8 @@ public class ShortUrl {
         this.expiresAt = expiresAt;
     }
 
-    public boolean isExpired() {
-        return expiresAt.isBefore(LocalDateTime.now());
+    public boolean isExpired(LocalDateTime now) {
+        return expiresAt.isBefore(now);
     }
 
 }
