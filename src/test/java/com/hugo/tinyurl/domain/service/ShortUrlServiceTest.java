@@ -7,6 +7,7 @@ import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.domain.entity.ShortUrl;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -28,7 +29,7 @@ class ShortUrlServiceTest {
 
         assertThat(shortUrl.getShortKey()).hasSize(8);
         assertThat(shortUrl.getOriginalUrl()).isEqualTo("https://example.com");
-        assertThat(shortUrl.isExpired()).isFalse();
+        assertThat(shortUrl.isExpired(LocalDateTime.now())).isFalse();
     }
 
     @Test
