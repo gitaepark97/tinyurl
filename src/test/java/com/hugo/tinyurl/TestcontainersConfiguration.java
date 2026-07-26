@@ -13,13 +13,13 @@ class TestcontainersConfiguration {
     @Bean
     @ServiceConnection
     LgtmStackContainer grafanaLgtmContainer() {
-        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:latest"));
+        return new LgtmStackContainer(DockerImageName.parse("grafana/otel-lgtm:0.29.2"));
     }
 
     @Bean
     @ServiceConnection
     MySQLContainer mysqlContainer() {
-        return new MySQLContainer(DockerImageName.parse("mysql:latest"));
+        return new MySQLContainer(DockerImageName.parse("mysql:8.4.10"));
     }
 
 }

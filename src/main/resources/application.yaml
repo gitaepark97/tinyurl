@@ -1,3 +1,36 @@
 spring:
   application:
     name: tinyurl
+  profiles:
+    active: local
+  config:
+    import:
+      - optional:${spring.profiles.active}/db.yaml
+      - optional:${spring.profiles.active}/management.yaml
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  docker:
+    compose:
+      lifecycle-management: start-only
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  docker:
+    compose:
+      enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  docker:
+    compose:
+      enabled: false

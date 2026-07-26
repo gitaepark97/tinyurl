@@ -1,0 +1,9 @@
+= Tinyurl API 문서
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+아직 문서화된 API가 없습니다.

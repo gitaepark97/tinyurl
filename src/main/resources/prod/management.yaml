@@ -1,0 +1,16 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACING_ENDPOINT}
+    metrics:
+      export:
+        url: ${OTLP_METRICS_ENDPOINT}
+  opentelemetry:
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTLP_LOGGING_ENDPOINT}

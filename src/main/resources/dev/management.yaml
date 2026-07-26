@@ -1,0 +1,16 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACING_ENDPOINT:http://localhost:4318/v1/traces}
+    metrics:
+      export:
+        url: ${OTLP_METRICS_ENDPOINT:http://localhost:4318/v1/metrics}
+  opentelemetry:
+    logging:
+      export:
+        otlp:
+          endpoint: ${OTLP_LOGGING_ENDPOINT:http://localhost:4318/v1/logs}

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:-},%X{spanId:-}] [%t] %logger{36} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <OpenTelemetry name="OpenTelemetryAppender"/>
+    </Appenders>
+
+    <Loggers>
+        <SpringProfile name="local">
+            <Logger name="com.hugo.tinyurl" level="DEBUG" additivity="false">
+                <AppenderRef ref="Console"/>
+                <AppenderRef ref="OpenTelemetryAppender"/>
+            </Logger>
+            <Logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+                <AppenderRef ref="Console"/>
+            </Logger>
+        </SpringProfile>
+
+        <SpringProfile name="local, dev">
+            <Root level="INFO">
+                <AppenderRef ref="Console"/>
+                <AppenderRef ref="OpenTelemetryAppender"/>
+            </Root>
+        </SpringProfile>
+
+        <SpringProfile name="prod">
+            <Root level="WARN">
+                <AppenderRef ref="Console"/>
+                <AppenderRef ref="OpenTelemetryAppender"/>
+            </Root>
+        </SpringProfile>
+    </Loggers>
+
+</Configuration>
