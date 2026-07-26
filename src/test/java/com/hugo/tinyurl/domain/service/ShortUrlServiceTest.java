@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.repository.ShortUrlCacheRepository;
+import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import java.time.LocalDateTime;
@@ -17,11 +19,14 @@ import org.springframework.context.annotation.Import;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({TestcontainersConfiguration.class, ShortUrlService.class, ShortKeyGenerator.class})
+@Import({TestcontainersConfiguration.class, ShortUrlService.class, ShortUrlCacheRepository.class, ShortKeyGenerator.class})
 class ShortUrlServiceTest {
 
     @Autowired
     ShortUrlService shortUrlService;
+
+    @Autowired
+    ShortUrlRepository shortUrlRepository;
 
     @Test
     void createsShortUrlWithSevenDayExpiration() {
@@ -50,6 +55,17 @@ class ShortUrlServiceTest {
     @Test
     void throwsNotFoundForUnknownKey() {
         assertThatThrownBy(() -> shortUrlService.getOriginalUrl("nope0000"))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.NOT_FOUND);
+    }
+
+    @Test
+    void throwsNotFoundForExpiredKey() {
+        ShortUrl expired = shortUrlRepository.save(
+            new ShortUrl("exp12345", "https://example.com", LocalDateTime.now().minusDays(1)));
+
+        assertThatThrownBy(() -> shortUrlService.getOriginalUrl(expired.getShortKey()))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
