@@ -26,6 +26,14 @@ public class ShortUrlService {
         return shortUrlRepository.save(new ShortUrl(shortKey, originalUrl, LocalDateTime.now().plus(EXPIRATION)));
     }
 
+    @Transactional(readOnly = true)
+    public String getOriginalUrl(String shortKey) {
+        ShortUrl shortUrl = shortUrlRepository.findByShortKey(shortKey)
+            .filter(url -> !url.isExpired())
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        return shortUrl.getOriginalUrl();
+    }
+
     private String generateUniqueShortKey() {
         for (int i = 0; i < MAX_KEY_RETRY; i++) {
             String candidate = shortKeyGenerator.generate();

@@ -23,3 +23,8 @@ include::{snippets}/short-url-create-invalid/response-fields.adoc[]
 
 include::{snippets}/short-url-redirect/http-request.adoc[]
 include::{snippets}/short-url-redirect/http-response.adoc[]
+
+=== 실패: 존재하지 않거나 만료된 키
+
+include::{snippets}/short-url-redirect-not-found/http-request.adoc[]
+include::{snippets}/short-url-redirect-not-found/http-response.adoc[]
