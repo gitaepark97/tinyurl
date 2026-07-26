@@ -19,3 +19,9 @@
     ./k6/run.sh redirect stress
 
 결과는 `reports/<api>/<scenario>/`에 쌓인다. 아카이빙 규칙은 `reports/README.md` 참고.
+
+## 인프라 리소스
+
+`compose.yaml`의 `mysql`, `grafana-lgtm` 컨테이너에 CPU/메모리 제한을 걸어뒀다(각각 2 CPU/1GB,
+1 CPU/2GB). 제한이 없으면 stress 시나리오에서 컨테이너가 호스트 자원을 무제한으로 끌어써서 결과가
+머신마다 달라지고 재현이 안 된다 — 응답시간 결과는 이 자원 한도 안에서 측정된 값으로 해석해야 한다.
