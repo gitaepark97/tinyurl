@@ -32,6 +32,19 @@ services:
           memory: 2G
         reservations:
           memory: 512M
+  redis:
+    image: 'redis:8.2-alpine'
+    container_name: 'tinyurl-redis'
+    command: 'redis-server --maxmemory 400mb --maxmemory-policy allkeys-lru'
+    ports:
+      - '6379:6379'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          memory: 256M
 
 volumes:
   mysql-data:

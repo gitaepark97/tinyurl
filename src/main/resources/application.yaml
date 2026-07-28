@@ -6,6 +6,7 @@ spring:
   config:
     import:
       - optional:${spring.profiles.active}/db.yaml
+      - optional:${spring.profiles.active}/cache.yaml
       - optional:${spring.profiles.active}/management.yaml
       - optional:${spring.profiles.active}/app.yaml
 

@@ -4,22 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
+import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.repository.ShortUrlCacheRepository;
 import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
-@Import({TestcontainersConfiguration.class, ShortUrlService.class, ShortUrlCacheRepository.class, ShortKeyGenerator.class})
+@SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
+@Import(TestcontainersConfiguration.class)
+@Transactional
 class ShortUrlServiceTest {
 
     @Autowired
