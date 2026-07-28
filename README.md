@@ -38,6 +38,21 @@ docker compose down
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
+### 컨테이너로 실행 (성능 테스트용)
+
+평소 로컬 개발은 위처럼 `bootRun`으로 충분하다. 오토스케일 인스턴스와 비슷하게 리소스가 제한된
+컨테이너에서 앱을 직접 띄워 성능을 확인하고 싶을 때만 `compose.dev.yaml`을 쓴다. `app` 서비스
+하나만 정의되어 있어 인프라(`mysql`/`redis`/`grafana-lgtm`)가 담긴 `compose.yaml`과 반드시 함께
+지정해야 한다 — `compose.dev.yaml` 단독으로 실행하면 `depends_on`이 정의되지 않은 서비스를
+참조해 바로 실패한다.
+
+```bash
+./gradlew bootJar
+docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+```
+
+- http://localhost:8080
+
 ## 관측성 (LGTM)
 
 `docker compose up` 이후 Grafana에서 로그(Loki)/트레이스(Tempo)/메트릭(Mimir)을 확인할 수 있다.

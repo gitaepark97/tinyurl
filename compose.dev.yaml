@@ -1,0 +1,27 @@
+# mysql/redis/grafana-lgtm은 compose.yaml에 있다 - 반드시 두 파일을 함께 지정해야 한다:
+#   docker compose -f compose.yaml -f compose.dev.yaml up -d --build
+services:
+  app:
+    build:
+      context: .
+    container_name: 'tinyurl-app'
+    ports:
+      - '8080:8080'
+    environment:
+      - 'SPRING_PROFILES_ACTIVE=dev'
+      - 'DB_URL=jdbc:mysql://mysql:3306/tinyurl'
+      - 'REDIS_HOST=redis'
+      - 'OTLP_TRACING_ENDPOINT=http://grafana-lgtm:4318/v1/traces'
+      - 'OTLP_METRICS_ENDPOINT=http://grafana-lgtm:4318/v1/metrics'
+      - 'OTLP_LOGGING_ENDPOINT=http://grafana-lgtm:4318/v1/logs'
+    depends_on:
+      - mysql
+      - redis
+      - grafana-lgtm
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          memory: 512M
