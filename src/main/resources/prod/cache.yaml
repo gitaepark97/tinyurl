@@ -1,0 +1,14 @@
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      # 캐시 장애 시 리다이렉트 요청이 오래 블로킹되지 않도록 짧게 잡는다 - DB 폴백으로
+      # 빠르게 넘어가는 게 목적.
+      timeout: 2s
+      connect-timeout: 2s
+
+app:
+  cache:
+    short-url:
+      expire-after-access-minutes: 10

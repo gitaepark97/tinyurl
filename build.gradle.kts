@@ -39,8 +39,8 @@ dependencies {
     implementation("org.flywaydb:flyway-mysql")
     runtimeOnly("com.mysql:mysql-connector-j")
 
-    // 로컬 캐시
-    implementation("com.github.ben-manes.caffeine:caffeine")
+    // 분산 캐시
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     // Observability: Actuator + Log4j2 + OpenTelemetry(LGTM 스택 연동)
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -69,9 +69,14 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-mysql")
+    testImplementation("com.redis:testcontainers-redis:2.2.4")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.jar {
+    enabled = false
 }
 
 tasks.withType<Test> {

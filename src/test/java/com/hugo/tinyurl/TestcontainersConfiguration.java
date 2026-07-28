@@ -1,5 +1,6 @@
 package com.hugo.tinyurl;
 
+import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,12 @@ public class TestcontainersConfiguration {
     @ServiceConnection
     MySQLContainer mysqlContainer() {
         return new MySQLContainer(DockerImageName.parse("mysql:8.4.10"));
+    }
+
+    @Bean
+    @ServiceConnection
+    RedisContainer redisContainer() {
+        return new RedisContainer(DockerImageName.parse("redis:8.2-alpine"));
     }
 
 }
