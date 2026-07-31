@@ -9,15 +9,17 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShortUrlService {
 
     private static final Duration EXPIRATION = Duration.ofDays(7);
-    private static final int MAX_KEY_RETRY = 5;
 
     private static final Clock CLOCK = Clock.systemDefaultZone();
 
@@ -25,10 +27,14 @@ public class ShortUrlService {
     private final ShortUrlCacheRepository shortUrlCacheRepository;
     private final ShortKeyGenerator shortKeyGenerator;
 
-    @Transactional
     public ShortUrl create(String originalUrl) {
-        String shortKey = generateUniqueShortKey();
-        return shortUrlRepository.save(new ShortUrl(shortKey, originalUrl, LocalDateTime.now(CLOCK).plus(EXPIRATION)));
+        String shortKey = shortKeyGenerator.generate();
+        try {
+            return shortUrlRepository.save(new ShortUrl(shortKey, originalUrl, LocalDateTime.now(CLOCK).plus(EXPIRATION)));
+        } catch (DataIntegrityViolationException e) {
+            log.error("short_key 충돌 발생 - shortKey={}", shortKey, e);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -44,21 +50,10 @@ public class ShortUrlService {
         return shortUrl.getOriginalUrl();
     }
 
-    // 캐시 미스일 때만 호출된다 — 이미 만료된 행은 캐시에 채우지 않고 그대로 null(=NOT_FOUND)로 흘려보낸다.
     private ShortUrl findValidByShortKey(String shortKey) {
         return shortUrlRepository.findByShortKey(shortKey)
             .filter(url -> !url.isExpired(LocalDateTime.now(CLOCK)))
             .orElse(null);
-    }
-
-    private String generateUniqueShortKey() {
-        for (int i = 0; i < MAX_KEY_RETRY; i++) {
-            String candidate = shortKeyGenerator.generate();
-            if (!shortUrlRepository.existsByShortKey(candidate)) {
-                return candidate;
-            }
-        }
-        throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
 }

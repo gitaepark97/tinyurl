@@ -45,6 +45,23 @@ services:
           memory: 512M
         reservations:
           memory: 256M
+  zookeeper:
+    image: 'zookeeper:3.9.4'
+    container_name: 'tinyurl-zookeeper'
+    ports:
+      - '2181:2181'
+    volumes:
+      - 'zookeeper-data:/data'
+      - 'zookeeper-datalog:/datalog'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          memory: 256M
 
 volumes:
   mysql-data:
+  zookeeper-data:
+  zookeeper-datalog:
