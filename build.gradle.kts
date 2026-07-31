@@ -45,6 +45,9 @@ dependencies {
     // 분산 유일 카운터(ZooKeeper)
     implementation("org.apache.curator:curator-recipes:5.9.0")
 
+    // 카운터 값을 예측 어려운 문자열로 변환(검증된 오픈소스 알고리즘)
+    implementation("org.sqids:sqids:0.1.0")
+
     // Observability: Actuator + Log4j2 + OpenTelemetry(LGTM 스택 연동)
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
