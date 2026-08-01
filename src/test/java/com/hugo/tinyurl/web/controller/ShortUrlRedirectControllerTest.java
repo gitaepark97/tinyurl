@@ -1,6 +1,9 @@
 package com.hugo.tinyurl.web.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,17 +33,20 @@ class ShortUrlRedirectControllerTest {
 
     @Test
     void redirectsToOriginalUrl() throws Exception {
-        given(shortUrlService.getOriginalUrl("abc12345")).willReturn("https://example.com");
+        given(shortUrlService.redirect(eq("abc12345"), any(), any(), any())).willReturn("https://example.com");
 
-        mockMvc.perform(get("/{shortKey}", "abc12345"))
+        mockMvc.perform(get("/{shortKey}", "abc12345").header("User-Agent", "test-agent"))
             .andExpect(status().isFound())
             .andExpect(header().string("Location", "https://example.com"))
             .andDo(document("short-url-redirect"));
+
+        verify(shortUrlService).redirect(eq("abc12345"), any(), eq("test-agent"), any());
     }
 
     @Test
     void returnsNotFoundForUnknownKey() throws Exception {
-        given(shortUrlService.getOriginalUrl("nope0000")).willThrow(new BusinessException(ErrorCode.NOT_FOUND));
+        given(shortUrlService.redirect(eq("nope0000"), any(), any(), any()))
+            .willThrow(new BusinessException(ErrorCode.NOT_FOUND));
 
         mockMvc.perform(get("/{shortKey}", "nope0000"))
             .andExpect(status().isNotFound())

@@ -7,6 +7,9 @@
 - Java 25 / Spring Boot 4.1.0
 - Gradle (Kotlin DSL)
 - Spring Web MVC, Spring Data JPA, Flyway, MySQL
+  - `short_url` 외에 리다이렉트 클릭 이벤트/집계용 `click_event`/`click_count` 테이블을 관리한다.
+- Apache ZooKeeper(Curator) — short key 발급용 전역 유일 카운터
+- Redis — 단축 URL 조회 캐시
 - Log4j2 (로깅), OpenTelemetry (Trace/Metric/Log 연동)
 - Spring REST Docs + Asciidoctor
 - Docker Compose (로컬 개발 인프라), Testcontainers (테스트)

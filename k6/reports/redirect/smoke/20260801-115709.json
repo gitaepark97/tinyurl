@@ -1,0 +1,174 @@
+{
+    "metrics": {
+        "iterations": {
+            "count": 17393,
+            "rate": 575.6427809718768
+        },
+        "data_received": {
+            "count": 1947692,
+            "rate": 64461.26828935071
+        },
+        "http_req_receiving": {
+            "avg": 0.015019353356686964,
+            "min": 0.007,
+            "med": 0.014,
+            "p(90)": 0.021,
+            "p(95)": 0.024,
+            "p(99)": 0.034,
+            "max": 0.508
+        },
+        "http_reqs": {
+            "count": 17413,
+            "rate": 576.3047056323402
+        },
+        "iteration_duration": {
+            "p(90)": 3.8067748,
+            "p(95)": 4.358731349999999,
+            "p(99)": 6.374883439999997,
+            "max": 228.7125,
+            "avg": 3.4582062416925248,
+            "min": 2.819584,
+            "med": 3.2442915
+        },
+        "checks": {
+            "passes": 17393,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 228.03,
+            "avg": 3.420297364038345,
+            "min": 2.789,
+            "med": 3.213,
+            "p(90)": 3.771,
+            "p(95)": 4.332599999999998,
+            "p(99)": 6.474159999999999
+        },
+        "http_req_waiting": {
+            "p(90)": 3.746,
+            "p(95)": 4.309,
+            "p(99)": 6.438759999999999,
+            "max": 227.949,
+            "avg": 3.401368977200965,
+            "min": 2.775,
+            "med": 3.195
+        },
+        "http_req_failed": {
+            "fails": 17413,
+            "passes": 0,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "vus_max": {
+            "value": 2,
+            "min": 2,
+            "max": 2
+        },
+        "http_req_tls_handshaking": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0,
+            "max": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0
+        },
+        "data_sent": {
+            "rate": 50781.33752402249,
+            "count": 1534354
+        },
+        "vus": {
+            "value": 2,
+            "min": 2,
+            "max": 2
+        },
+        "http_req_connecting": {
+            "min": 0,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0.06071999999998933,
+            "max": 0.246,
+            "avg": 0.0011763050594383502
+        },
+        "http_req_blocked": {
+            "med": 0.001,
+            "p(90)": 0.001,
+            "p(95)": 0.002,
+            "p(99)": 0.08431999999999783,
+            "max": 1.291,
+            "avg": 0.0024108424740135227,
+            "min": 0
+        },
+        "http_req_duration": {
+            "p(90)": 3.771,
+            "p(95)": 4.332599999999998,
+            "p(99)": 6.474159999999999,
+            "max": 228.03,
+            "avg": 3.420297364038345,
+            "min": 2.789,
+            "med": 3.213,
+            "thresholds": {
+                "p(95)<150": false
+            }
+        },
+        "http_req_sending": {
+            "max": 0.258,
+            "avg": 0.003909033480732973,
+            "min": 0.001,
+            "med": 0.003,
+            "p(90)": 0.007,
+            "p(95)": 0.008,
+            "p(99)": 0.015
+        }
+    },
+    "setup_data": {
+        "keys": [
+            "HMNPaVtl",
+            "eXilO6l8",
+            "sgxmd8ja",
+            "GKaJnUcn",
+            "RVloaeNh",
+            "LQyt0pHO",
+            "P2bXsNMc",
+            "CxAQGSrJ",
+            "YwW3XETx",
+            "5RISaQZn",
+            "FkJO1GX8",
+            "ksCraKT9",
+            "37BhYWpP",
+            "DuXVHPsx",
+            "mDeRRx3n",
+            "5RISIQZn",
+            "M0Y2Enyl",
+            "pArySklV",
+            "sgxmi8ja",
+            "rmQ5RClY"
+        ]
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "checks": {},
+                "name": "setup",
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {}
+            }
+        },
+        "checks": {
+            "status is 302": {
+                "name": "status is 302",
+                "path": "::status is 302",
+                "id": "9ef425e11baabefe00b04a8500db882d",
+                "passes": 17393,
+                "fails": 0
+            }
+        }
+    }
+}
