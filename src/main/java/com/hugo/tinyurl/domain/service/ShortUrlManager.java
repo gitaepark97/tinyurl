@@ -19,8 +19,8 @@ class ShortUrlManager {
     private static final Duration EXPIRATION = Duration.ofDays(7);
 
     private final ShortUrlRepository shortUrlRepository;
-    private final ShortKeyGenerator shortKeyGenerator;
     private final ClockProvider clockProvider;
+    private final ShortKeyGenerator shortKeyGenerator;
 
     ShortUrl create(String originalUrl) {
         String shortKey = shortKeyGenerator.generate();

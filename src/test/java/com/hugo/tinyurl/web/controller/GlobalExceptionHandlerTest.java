@@ -36,6 +36,21 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handlesTypeMismatch() throws Exception {
+        mockMvc.perform(get("/test/type-mismatch/not-a-number"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
+            .andExpect(jsonPath("$.data.id").exists());
+    }
+
+    @Test
+    void handlesBeanInstantiationExceptionFromModelAttribute() throws Exception {
+        mockMvc.perform(get("/test/model-attribute").param("size", "0"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+    }
+
+    @Test
     void handlesMethodNotAllowed() throws Exception {
         mockMvc.perform(post("/test/business-exception"))
             .andExpect(status().isMethodNotAllowed())

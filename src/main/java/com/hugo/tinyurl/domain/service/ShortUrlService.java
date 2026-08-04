@@ -1,6 +1,9 @@
 package com.hugo.tinyurl.domain.service;
 
+import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.support.page.Page;
+import com.hugo.tinyurl.support.page.PageParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,14 @@ public class ShortUrlService {
 
     public ShortUrl create(String originalUrl) {
         return shortUrlManager.create(originalUrl);
+    }
+
+    public Page<ShortUrlWithClickCount> findAll(PageParam pageParam) {
+        return shortUrlFinder.findAll(pageParam);
+    }
+
+    public ShortUrlWithClickCount find(Long id) {
+        return shortUrlFinder.get(id);
     }
 
     public String redirect(String shortKey, String ipAddress, String userAgent, String referer) {
