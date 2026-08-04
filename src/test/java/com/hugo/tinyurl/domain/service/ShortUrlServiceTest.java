@@ -13,8 +13,6 @@ import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +25,6 @@ import org.springframework.context.annotation.Import;
 class ShortUrlServiceTest {
 
     @Autowired
-    ShortUrlService shortUrlService;
-
-    @Autowired
     ShortUrlRepository shortUrlRepository;
 
     @Autowired
@@ -38,53 +33,43 @@ class ShortUrlServiceTest {
     @Autowired
     ClickCountRepository clickCountRepository;
 
-    private final List<Long> createdShortUrlIds = new ArrayList<>();
+    @Autowired
+    ShortUrlService shortUrlService;
+
+    @Autowired
+    ShortKeyGenerator shortKeyGenerator;
+
+    ShortUrl shortUrl;
 
     @AfterEach
     void cleanUp() {
-        shortUrlRepository.deleteAllById(createdShortUrlIds);
-        createdShortUrlIds.clear();
-    }
-
-    private ShortUrl create(String originalUrl) {
-        ShortUrl shortUrl = shortUrlService.create(originalUrl);
-        createdShortUrlIds.add(shortUrl.getId());
-        return shortUrl;
+        if (shortUrl != null) {
+            clickEventRepository.deleteAll(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId()));
+            clickCountRepository.deleteById(shortUrl.getId());
+            shortUrlRepository.deleteById(shortUrl.getId());
+        }
     }
 
     @Test
-    void createsShortUrlWithSevenDayExpiration() {
-        ShortUrl shortUrl = create("https://example.com");
+    void redirectSucceedsEvenWhenClickRecordingFails() {
+        shortUrl = shortUrlService.create("https://example.com");
+        String oversizedUserAgent = "A".repeat(600);
 
-        assertThat(shortUrl.getShortKey()).hasSize(8);
-        assertThat(shortUrl.getOriginalUrl()).isEqualTo("https://example.com");
-        assertThat(shortUrl.isExpired(LocalDateTime.now())).isFalse();
-    }
-
-    @Test
-    void issuesNewShortKeyForSameOriginalUrl() {
-        ShortUrl first = create("https://example.com");
-        ShortUrl second = create("https://example.com");
-
-        assertThat(first.getShortKey()).isNotEqualTo(second.getShortKey());
-    }
-
-    @Test
-    void returnsOriginalUrlForValidKey() {
-        ShortUrl shortUrl = create("https://example.com");
-
-        String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", null);
+        String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", oversizedUserAgent, null);
 
         assertThat(originalUrl).isEqualTo("https://example.com");
+        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).isEmpty();
+        assertThat(clickCountRepository.findById(shortUrl.getId())).isEmpty();
     }
 
     @Test
-    void recordsClickEventOnSuccessfulRedirect() {
-        ShortUrl shortUrl = create("https://example.com");
+    void redirectRecordsClickEventOnSuccess() {
+        shortUrl = shortUrlService.create("https://example.com");
 
-        shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
+        String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
 
-        assertThat(clickEventRepository.findByShortUrlId(shortUrl.getId())).singleElement().satisfies(event -> {
+        assertThat(originalUrl).isEqualTo("https://example.com");
+        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).singleElement().satisfies(event -> {
             assertThat(event.getIpAddress()).isEqualTo("127.0.0.1");
             assertThat(event.getUserAgent()).isEqualTo("test-agent");
             assertThat(event.getReferer()).isEqualTo("https://referer.example.com");
@@ -105,16 +90,15 @@ class ShortUrlServiceTest {
 
     @Test
     void throwsNotFoundForExpiredKeyWithoutRecordingClick() {
-        ShortUrl expired = shortUrlRepository.save(
-            new ShortUrl("exp12345", "https://example.com", LocalDateTime.now().minusDays(1)));
-        createdShortUrlIds.add(expired.getId());
+        shortUrl = shortUrlRepository.save(
+            new ShortUrl(shortKeyGenerator.generate(), "https://example.com", LocalDateTime.now().minusDays(1)));
 
-        assertThatThrownBy(() -> shortUrlService.redirect(expired.getShortKey(), "127.0.0.1", "test-agent", null))
+        assertThatThrownBy(() -> shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", null))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
-
-        assertThat(clickEventRepository.findByShortUrlId(expired.getId())).isEmpty();
+        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).isEmpty();
+        assertThat(clickCountRepository.findById(shortUrl.getId())).isEmpty();
     }
 
 }

@@ -19,6 +19,30 @@ include::{snippets}/short-url-create-invalid/http-request.adoc[]
 include::{snippets}/short-url-create-invalid/http-response.adoc[]
 include::{snippets}/short-url-create-invalid/response-fields.adoc[]
 
+== 단축 URL 목록 조회
+
+`id`(auto-increment) 내림차순으로 조회한다. 다음 페이지를 조회하려면 `cursor`에 응답
+`data.content`의 마지막 항목 `id`를 넘긴다. `cursor`를 생략하면 최신 항목부터 조회한다.
+
+include::{snippets}/short-url-list/http-request.adoc[]
+include::{snippets}/short-url-list/query-parameters.adoc[]
+include::{snippets}/short-url-list/http-response.adoc[]
+include::{snippets}/short-url-list/response-fields.adoc[]
+
+== 단축 URL 단건 조회
+
+`shortKey`가 아니라 단축 URL의 내부 `id`로 조회한다(목록 조회 응답의 `id`를 그대로 사용). 만료된
+단축 URL도 조회 가능하다(리다이렉트만 막히고 조회는 계속 가능해야 하기 때문).
+
+include::{snippets}/short-url-find/http-request.adoc[]
+include::{snippets}/short-url-find/http-response.adoc[]
+include::{snippets}/short-url-find/response-fields.adoc[]
+
+=== 실패: 존재하지 않는 id
+
+include::{snippets}/short-url-find-not-found/http-request.adoc[]
+include::{snippets}/short-url-find-not-found/http-response.adoc[]
+
 == 단축 URL 리다이렉트
 
 include::{snippets}/short-url-redirect/http-request.adoc[]
@@ -28,3 +52,16 @@ include::{snippets}/short-url-redirect/http-response.adoc[]
 
 include::{snippets}/short-url-redirect-not-found/http-request.adoc[]
 include::{snippets}/short-url-redirect-not-found/http-response.adoc[]
+
+== 클릭 이벤트 목록 조회
+
+`id`(단축 URL의 내부 id) 아래 중첩된 리소스로 조회한다. 페이지네이션 방식은 단축 URL 목록
+조회와 동일하다. 존재하지 않는 id로 조회해도 404가 아니라 빈 목록(200)을 반환한다 - 만료된
+단축 URL의 클릭 이력도 조회 가능해야 하므로, 리다이렉트처럼 존재/만료 여부를 엄격히 검사하지
+않는다.
+
+include::{snippets}/click-event-list/http-request.adoc[]
+include::{snippets}/click-event-list/path-parameters.adoc[]
+include::{snippets}/click-event-list/query-parameters.adoc[]
+include::{snippets}/click-event-list/http-response.adoc[]
+include::{snippets}/click-event-list/response-fields.adoc[]

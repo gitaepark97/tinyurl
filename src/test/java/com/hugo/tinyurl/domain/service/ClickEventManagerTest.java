@@ -34,8 +34,8 @@ class ClickEventManagerTest {
 
     @AfterEach
     void cleanUp() {
-        clickEventRepository.deleteAll(clickEventRepository.findByShortUrlId(SHORT_URL_ID_1));
-        clickEventRepository.deleteAll(clickEventRepository.findByShortUrlId(SHORT_URL_ID_2));
+        clickEventRepository.deleteAll(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, SHORT_URL_ID_1));
+        clickEventRepository.deleteAll(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, SHORT_URL_ID_2));
         clickCountRepository.deleteById(SHORT_URL_ID_1);
         clickCountRepository.deleteById(SHORT_URL_ID_2);
     }
@@ -44,7 +44,7 @@ class ClickEventManagerTest {
     void recordsEventAndIncrementsCount() {
         clickEventManager.record(SHORT_URL_ID_1, "127.0.0.1", "test-agent", "https://referer.example.com");
 
-        assertThat(clickEventRepository.findByShortUrlId(SHORT_URL_ID_1)).singleElement().satisfies(event -> {
+        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, SHORT_URL_ID_1)).singleElement().satisfies(event -> {
             assertThat(event.getIpAddress()).isEqualTo("127.0.0.1");
             assertThat(event.getUserAgent()).isEqualTo("test-agent");
             assertThat(event.getReferer()).isEqualTo("https://referer.example.com");
