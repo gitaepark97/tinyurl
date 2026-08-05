@@ -1,0 +1,165 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "name": "setup",
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {}
+            }
+        },
+        "checks": {
+            "status is 302": {
+                "name": "status is 302",
+                "path": "::status is 302",
+                "id": "9ef425e11baabefe00b04a8500db882d",
+                "passes": 26187,
+                "fails": 0
+            }
+        }
+    },
+    "metrics": {
+        "http_req_sending": {
+            "p(95)": 0.013,
+            "avg": 0.004943869958408175,
+            "min": 0.001,
+            "med": 0.003,
+            "max": 0.713,
+            "p(90)": 0.008
+        },
+        "data_sent": {
+            "count": 2308226,
+            "rate": 76328.55139452465
+        },
+        "vus_max": {
+            "max": 2,
+            "value": 2,
+            "min": 2
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 26207,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "checks": {
+            "passes": 26187,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_connecting": {
+            "avg": 0.0014778494295417254,
+            "min": 0,
+            "med": 0,
+            "max": 0.321,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "iterations": {
+            "count": 26187,
+            "rate": 865.9532365411433
+        },
+        "vus": {
+            "min": 2,
+            "max": 2,
+            "value": 2
+        },
+        "http_req_blocked": {
+            "p(90)": 0.002,
+            "p(95)": 0.003,
+            "avg": 0.0029949631777769995,
+            "min": 0,
+            "med": 0.001,
+            "max": 1.195
+        },
+        "http_reqs": {
+            "count": 26207,
+            "rate": 866.6145977024379
+        },
+        "http_req_tls_handshaking": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0
+        },
+        "http_req_duration": {
+            "p(90)": 2.709,
+            "p(95)": 3.331,
+            "avg": 2.2499621093601125,
+            "min": 1.318,
+            "med": 1.96,
+            "max": 255.951,
+            "thresholds": {
+                "p(95)<150": false
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "p(95)": 3.331,
+            "avg": 2.2499621093601125,
+            "min": 1.318,
+            "med": 1.96,
+            "max": 255.951,
+            "p(90)": 2.709
+        },
+        "http_req_waiting": {
+            "avg": 2.2251161521730864,
+            "min": 1.302,
+            "med": 1.938,
+            "max": 255.917,
+            "p(90)": 2.676,
+            "p(95)": 3.2876999999999987
+        },
+        "iteration_duration": {
+            "avg": 2.2956772569115755,
+            "min": 1.345166,
+            "med": 1.9988545,
+            "max": 256.791375,
+            "p(90)": 2.7714374,
+            "p(95)": 3.385305799999999
+        },
+        "data_received": {
+            "count": 2932112,
+            "rate": 96959.24986829818
+        },
+        "http_req_receiving": {
+            "med": 0.015,
+            "max": 1.076,
+            "p(90)": 0.035,
+            "p(95)": 0.053,
+            "avg": 0.01990208722860207,
+            "min": 0.005
+        }
+    },
+    "setup_data": {
+        "keys": [
+            "FkJmCGX8",
+            "ksCDoKT9",
+            "37BpUWpP",
+            "DuXT0Psx",
+            "mDennx3n",
+            "5RINzQZn",
+            "M0YGLnyl",
+            "pAriNklV",
+            "sgxuh8ja",
+            "rmQVnClY",
+            "8Ho2wR0I",
+            "aSk6MtNv",
+            "QevzjA48",
+            "QevzwA48",
+            "8Ho2GR0I",
+            "oNg3tlrK",
+            "4yU8qOlu",
+            "q1hLH31J",
+            "JCpeTaEB",
+            "tIKgdyJw"
+        ]
+    }
+}
