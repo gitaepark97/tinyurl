@@ -1,0 +1,6 @@
+app:
+  click-event:
+    async:
+      core-pool-size: 4
+      max-pool-size: 8
+      queue-capacity: 500
