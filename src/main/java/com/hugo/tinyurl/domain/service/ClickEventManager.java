@@ -1,24 +1,24 @@
 package com.hugo.tinyurl.domain.service;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 class ClickEventManager {
 
-    private final ClickEventRepository clickEventRepository;
-    private final ClickCountRepository clickCountRepository;
+    private final ClickEventRecorder clickEventRecorder;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Async("clickEventExecutor")
     void record(Long shortUrlId, String ipAddress, String userAgent, String referer) {
-        clickEventRepository.save(new ClickEvent(shortUrlId, ipAddress, userAgent, referer));
-        clickCountRepository.increment(shortUrlId);
+        try {
+            clickEventRecorder.record(shortUrlId, ipAddress, userAgent, referer);
+        } catch (Exception e) {
+            log.error("클릭 이벤트 기록 실패 - shortUrlId={}", shortUrlId, e);
+        }
     }
 
 }
