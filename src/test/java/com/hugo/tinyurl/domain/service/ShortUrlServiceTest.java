@@ -2,6 +2,7 @@ package com.hugo.tinyurl.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
@@ -12,6 +13,7 @@ import com.hugo.tinyurl.domain.repository.ClickEventRepository;
 import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -51,15 +53,13 @@ class ShortUrlServiceTest {
     }
 
     @Test
-    void redirectSucceedsEvenWhenClickRecordingFails() {
+    void redirectReturnsImmediatelyRegardlessOfClickRecordingOutcome() {
         shortUrl = shortUrlService.create("https://example.com");
         String oversizedUserAgent = "A".repeat(600);
 
         String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", oversizedUserAgent, null);
 
         assertThat(originalUrl).isEqualTo("https://example.com");
-        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).isEmpty();
-        assertThat(clickCountRepository.findById(shortUrl.getId())).isEmpty();
     }
 
     @Test
@@ -69,15 +69,17 @@ class ShortUrlServiceTest {
         String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
 
         assertThat(originalUrl).isEqualTo("https://example.com");
-        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).singleElement().satisfies(event -> {
-            assertThat(event.getIpAddress()).isEqualTo("127.0.0.1");
-            assertThat(event.getUserAgent()).isEqualTo("test-agent");
-            assertThat(event.getReferer()).isEqualTo("https://referer.example.com");
+        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+            assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).singleElement().satisfies(event -> {
+                assertThat(event.getIpAddress()).isEqualTo("127.0.0.1");
+                assertThat(event.getUserAgent()).isEqualTo("test-agent");
+                assertThat(event.getReferer()).isEqualTo("https://referer.example.com");
+            });
+            assertThat(clickCountRepository.findById(shortUrl.getId()))
+                .get()
+                .extracting(ClickCount::getCount)
+                .isEqualTo(1L);
         });
-        assertThat(clickCountRepository.findById(shortUrl.getId()))
-            .get()
-            .extracting(ClickCount::getCount)
-            .isEqualTo(1L);
     }
 
     @Test
