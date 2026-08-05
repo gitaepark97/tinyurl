@@ -13,3 +13,14 @@ export function seedShortKeys(count) {
     }
     return keys;
 }
+
+export function seedShortUrl(originalUrl) {
+    const res = http.post(`${BASE_URL}/api/v1/urls`, JSON.stringify({ originalUrl }), jsonHeaders());
+    return { id: res.json('data.id'), shortKey: res.json('data.shortKey') };
+}
+
+export function seedClickEvents(shortKey, count) {
+    for (let i = 0; i < count; i++) {
+        http.get(`${BASE_URL}/${shortKey}`, { redirects: 0 });
+    }
+}
