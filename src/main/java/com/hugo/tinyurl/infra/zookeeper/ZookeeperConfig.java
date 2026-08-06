@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.config;
+package com.hugo.tinyurl.infra.zookeeper;
 
 import java.util.concurrent.TimeUnit;
 import org.apache.curator.RetryPolicy;

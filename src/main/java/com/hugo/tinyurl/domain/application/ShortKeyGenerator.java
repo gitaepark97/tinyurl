@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.repository.Counter;
+import com.hugo.tinyurl.domain.port.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

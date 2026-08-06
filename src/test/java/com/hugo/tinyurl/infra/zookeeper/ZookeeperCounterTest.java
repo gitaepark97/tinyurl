@@ -1,9 +1,10 @@
-package com.hugo.tinyurl.domain.repository;
+package com.hugo.tinyurl.infra.zookeeper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.domain.port.Counter;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @Import(TestcontainersConfiguration.class)
-class CounterTest {
+class ZookeeperCounterTest {
 
     @Autowired
     Counter counter;

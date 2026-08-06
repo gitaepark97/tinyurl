@@ -3,7 +3,7 @@ package com.hugo.tinyurl.domain.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.hugo.tinyurl.domain.repository.Counter;
+import com.hugo.tinyurl.domain.port.Counter;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
