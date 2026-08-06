@@ -8,6 +8,7 @@ import org.apache.curator.framework.recipes.atomic.DistributedAtomicLong;
 import org.apache.curator.framework.recipes.atomic.PromotedToLock;
 import org.apache.curator.retry.BoundedExponentialBackoffRetry;
 import org.apache.curator.retry.RetryNTimes;
+import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,9 @@ class ZookeeperConfig {
 
     private static final String SHORT_KEY_COUNTER_PATH = "/tinyurl/short-key-counter";
     private static final String SHORT_KEY_COUNTER_LOCK_PATH = "/tinyurl/short-key-counter-lock";
+    private static final String WORKER_ID_PATH_PREFIX = "/tinyurl/id-generator/workers/worker-";
     private static final int CONNECT_TIMEOUT_SECONDS = 10;
+    private static final long MAX_WORKER_ID = 1023L; // IdGenerator 구현체의 worker-id 비트폭(10bit)과 맞춤
 
     private static final RetryPolicy RETRY_POLICY = new RetryNTimes(3, 100);
     // 뮤텍스로 승격된 뒤에는 포기하지 않고 기다리는 게 맞으므로, 연결/낙관적 CAS용 RETRY_POLICY보다
@@ -39,6 +42,16 @@ class ZookeeperConfig {
             .retryPolicy(LOCK_RETRY_POLICY)
             .build();
         return new DistributedAtomicLong(curatorFramework, SHORT_KEY_COUNTER_PATH, RETRY_POLICY, promotedToLock);
+    }
+
+    @Bean
+    long workerId(CuratorFramework curatorFramework) throws Exception {
+        String createdPath = curatorFramework.create()
+            .creatingParentsIfNeeded()
+            .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
+            .forPath(WORKER_ID_PATH_PREFIX);
+        long sequence = Long.parseLong(createdPath.substring(createdPath.lastIndexOf('-') + 1));
+        return sequence % (MAX_WORKER_ID + 1);
     }
 
     private void awaitConnection(CuratorFramework client, String connectString) {

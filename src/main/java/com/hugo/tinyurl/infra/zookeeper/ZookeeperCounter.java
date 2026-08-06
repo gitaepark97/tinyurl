@@ -3,18 +3,16 @@ package com.hugo.tinyurl.infra.zookeeper;
 import com.hugo.tinyurl.domain.port.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.apache.curator.framework.recipes.atomic.AtomicValue;
 import org.apache.curator.framework.recipes.atomic.DistributedAtomicLong;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 class ZookeeperCounter implements Counter {
 
     private final DistributedAtomicLong shortKeyCounter;
-
-    ZookeeperCounter(DistributedAtomicLong shortKeyCounter) {
-        this.shortKeyCounter = shortKeyCounter;
-    }
 
     @Override
     public long next() {
