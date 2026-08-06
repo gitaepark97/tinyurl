@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.domain.service;
+package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.entity.ClickEvent;
 import com.hugo.tinyurl.support.page.Page;

@@ -2,7 +2,7 @@ package com.hugo.tinyurl.web.controller.v1;
 
 import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.service.ShortUrlService;
+import com.hugo.tinyurl.domain.application.ShortUrlService;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import com.hugo.tinyurl.support.response.ApiResponse;

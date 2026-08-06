@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.web.controller;
 
-import com.hugo.tinyurl.domain.service.ShortUrlService;
+import com.hugo.tinyurl.domain.application.ShortUrlService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;

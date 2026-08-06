@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.hugo.tinyurl.domain.entity.ClickEvent;
-import com.hugo.tinyurl.domain.service.ClickEventService;
+import com.hugo.tinyurl.domain.application.ClickEventService;
 import com.hugo.tinyurl.support.page.Page;
 import java.util.List;
 import org.junit.jupiter.api.Test;

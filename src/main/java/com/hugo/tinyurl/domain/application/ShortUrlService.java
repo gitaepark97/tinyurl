@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.domain.service;
+package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.entity.ShortUrl;

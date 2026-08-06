@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.service.ShortUrlService;
+import com.hugo.tinyurl.domain.application.ShortUrlService;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;

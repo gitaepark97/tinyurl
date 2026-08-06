@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.domain.service;
+package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.repository.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;

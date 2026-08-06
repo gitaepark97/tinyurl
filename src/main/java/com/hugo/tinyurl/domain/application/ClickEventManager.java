@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.domain.service;
+package com.hugo.tinyurl.domain.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
