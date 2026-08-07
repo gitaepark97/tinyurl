@@ -70,13 +70,30 @@ class ClickEventRecorderTest {
     }
 
     @Test
-    void doesNotRetryNonTransientFailure() {
-        given(clickEventRepository.save(any())).willThrow(new DataIntegrityViolationException("constraint violation"));
+    void retriesIdCollisionUntilSuccess() {
+        given(clickEventRepository.save(any()))
+            .willThrow(new DataIntegrityViolationException("duplicate id"))
+            .willThrow(new DataIntegrityViolationException("duplicate id"))
+            .willAnswer(invocation -> invocation.getArgument(0));
+
+        clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null);
+
+        verify(clickEventRepository, times(3)).save(any());
+        assertThat(clickCountRepository.findById(SHORT_URL_ID))
+            .get()
+            .extracting(ClickCount::count)
+            .isEqualTo(1L);
+    }
+
+    @Test
+    void propagatesAfterMaxRetriesExhaustedOnRepeatedIdCollision() {
+        given(clickEventRepository.save(any())).willThrow(new DataIntegrityViolationException("duplicate id"));
 
         assertThatThrownBy(() -> clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null))
             .isInstanceOf(DataIntegrityViolationException.class);
 
-        verify(clickEventRepository, times(1)).save(any());
+        verify(clickEventRepository, times(3)).save(any());
+        assertThat(clickCountRepository.findById(SHORT_URL_ID)).isEmpty();
     }
 
 }

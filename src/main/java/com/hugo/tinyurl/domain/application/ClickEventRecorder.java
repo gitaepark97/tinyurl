@@ -6,6 +6,7 @@ import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import com.hugo.tinyurl.domain.port.ClockProvider;
 import com.hugo.tinyurl.domain.port.IdGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,10 @@ class ClickEventRecorder {
     private final IdGenerator idGenerator;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Retryable(includes = TransientDataAccessException.class, maxRetries = 2, delay = 200, multiplier = 2)
+    @Retryable(
+        includes = {TransientDataAccessException.class, DataIntegrityViolationException.class},
+        maxRetries = 2, delay = 200, multiplier = 2
+    )
     void record(Long shortUrlId, String ipAddress, String userAgent, String referer) {
         ClickEvent clickEvent = ClickEvent.create(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, clockProvider.now());
         clickEventRepository.save(clickEvent);
