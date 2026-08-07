@@ -30,9 +30,9 @@ class JpaClickEventRepository implements ClickEventRepository {
 
     @Override
     public void deleteAll(Iterable<ClickEvent> clickEvents) {
-        List<Long> ids = new ArrayList<>();
-        clickEvents.forEach(clickEvent -> ids.add(clickEvent.id()));
-        clickEventEntityRepository.deleteAllById(ids);
+        List<ClickEventJpaEntity> entities = new ArrayList<>();
+        clickEvents.forEach(clickEvent -> entities.add(ClickEventJpaEntity.from(clickEvent)));
+        clickEventEntityRepository.deleteAllInBatch(entities);
     }
 
 }
