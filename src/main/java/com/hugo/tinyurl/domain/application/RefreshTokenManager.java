@@ -1,0 +1,31 @@
+package com.hugo.tinyurl.domain.application;
+
+import com.hugo.tinyurl.domain.port.RefreshTokenRepository;
+import com.hugo.tinyurl.support.exception.BusinessException;
+import com.hugo.tinyurl.support.exception.ErrorCode;
+import java.time.Duration;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+class RefreshTokenManager {
+
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    void issue(Long memberId, String refreshToken, Duration ttl) {
+        refreshTokenRepository.save(memberId, refreshToken, ttl);
+    }
+
+    void rotate(Long memberId, String oldRefreshToken, String newRefreshToken, Duration ttl) {
+        boolean rotated = refreshTokenRepository.replace(memberId, oldRefreshToken, newRefreshToken, ttl);
+        if (!rotated) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+    }
+
+    void revoke(Long memberId) {
+        refreshTokenRepository.deleteByMemberId(memberId);
+    }
+
+}

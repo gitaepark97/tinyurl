@@ -1,3 +1,6 @@
 app:
   short-url:
     base-url: http://localhost:8080
+  security:
+    jwt:
+      secret: local-only-jwt-secret-please-change-in-production-32bytes

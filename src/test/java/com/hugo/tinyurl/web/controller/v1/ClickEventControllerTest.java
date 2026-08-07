@@ -16,16 +16,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hugo.tinyurl.domain.application.ClickEventService;
 import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.support.page.Page;
+import com.hugo.tinyurl.web.security.TokenProvider;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+// addFilters=false 없이는 SecurityConfig 없는 슬라이스에 Boot 기본 보안(CSRF 등)이 대신 적용된다.
 @WebMvcTest(controllers = ClickEventController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureRestDocs
 class ClickEventControllerTest {
 
@@ -34,6 +38,9 @@ class ClickEventControllerTest {
 
     @MockitoBean
     ClickEventService clickEventService;
+
+    @MockitoBean
+    TokenProvider tokenProvider;
 
     @Test
     void findsClickEventList() throws Exception {

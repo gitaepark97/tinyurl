@@ -14,14 +14,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.hugo.tinyurl.domain.application.ShortUrlService;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import com.hugo.tinyurl.web.security.TokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+// addFilters=false 없이는 SecurityConfig 없는 슬라이스에 Boot 기본 보안(CSRF 등)이 대신 적용된다.
 @WebMvcTest(controllers = ShortUrlRedirectController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureRestDocs
 class ShortUrlRedirectControllerTest {
 
@@ -30,6 +34,9 @@ class ShortUrlRedirectControllerTest {
 
     @MockitoBean
     ShortUrlService shortUrlService;
+
+    @MockitoBean
+    TokenProvider tokenProvider;
 
     @Test
     void redirectsToOriginalUrl() throws Exception {

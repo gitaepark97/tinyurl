@@ -45,9 +45,14 @@ dependencies {
     // 분산 유일 카운터(ZooKeeper)
     implementation("org.apache.curator:curator-recipes:5.9.0")
 
-    // 비밀번호 해시(구체 암호화 알고리즘 라이브러리 — infra.hash 뒤로 숨긴다) — 버전은
-    // Spring Boot의 dependency management를 따른다
-    implementation("org.springframework.security:spring-security-crypto")
+    // 인증/인가(필터 체인) — spring-security-crypto(비밀번호 해시)도 여기 포함돼 있어
+    // 별도로 선언하지 않는다
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // JWT 발급/검증
+    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
     // 카운터 값을 예측 어려운 문자열로 변환(검증된 오픈소스 알고리즘)
     implementation("org.sqids:sqids:0.1.0")
@@ -69,6 +74,7 @@ dependencies {
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")

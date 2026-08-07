@@ -20,18 +20,24 @@ import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
+import com.hugo.tinyurl.web.security.TokenProvider;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+// 이 컨트롤러는 인가 규칙을 다루지 않으므로 보안 필터 체인을 아예 적용하지 않는다 - 적용하면
+// 커스텀 SecurityConfig가 없는 이 슬라이스에서 Spring Boot 기본 보안 설정(CSRF 등)으로 대체돼
+// 무관한 요청까지 막힌다.
 @WebMvcTest(controllers = ShortUrlController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureRestDocs
 class ShortUrlControllerTest {
 
@@ -40,6 +46,11 @@ class ShortUrlControllerTest {
 
     @MockitoBean
     ShortUrlService shortUrlService;
+
+    // JwtAuthenticationFilter(Filter 타입)는 @WebMvcTest가 그대로 빈으로 끌어온다 - addFilters=false로
+    // 실행은 막아도 빈 생성 자체엔 TokenProvider가 필요하다.
+    @MockitoBean
+    TokenProvider tokenProvider;
 
     @Test
     void createsShortUrl() throws Exception {
