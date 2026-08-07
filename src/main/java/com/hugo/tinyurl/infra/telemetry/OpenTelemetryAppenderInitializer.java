@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.infra.logging;
+package com.hugo.tinyurl.infra.telemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.instrumentation.log4j.appender.v2_17.OpenTelemetryAppender;
