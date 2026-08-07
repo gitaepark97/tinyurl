@@ -3,6 +3,7 @@ package com.hugo.tinyurl.infra.zookeeper;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.hugo.tinyurl.support.exception.BusinessException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class SnowflakeIdGeneratorTest {
 
@@ -61,6 +63,24 @@ class SnowflakeIdGeneratorTest {
     void rejectsWorkerIdOutOfRange() {
         assertThatThrownBy(() -> new SnowflakeIdGenerator(-1)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new SnowflakeIdGenerator(1024)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void waitsOutSmallBackwardClockDriftAndContinues() {
+        SnowflakeIdGenerator idGenerator = new SnowflakeIdGenerator(1);
+        ReflectionTestUtils.setField(idGenerator, "lastTimestamp", System.currentTimeMillis() + 2);
+
+        long id = idGenerator.generate();
+
+        assertThat(id).isPositive();
+    }
+
+    @Test
+    void rejectsLargeBackwardClockDrift() {
+        SnowflakeIdGenerator idGenerator = new SnowflakeIdGenerator(1);
+        ReflectionTestUtils.setField(idGenerator, "lastTimestamp", System.currentTimeMillis() + 100);
+
+        assertThatThrownBy(idGenerator::generate).isInstanceOf(BusinessException.class);
     }
 
 }

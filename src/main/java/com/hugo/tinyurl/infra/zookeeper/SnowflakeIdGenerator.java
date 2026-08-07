@@ -15,6 +15,8 @@ class SnowflakeIdGenerator implements IdGenerator {
     private static final long MAX_SEQUENCE = (1L << SEQUENCE_BITS) - 1;
     private static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
     private static final long TIMESTAMP_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
+    // NTP 보정 등 짧은 역행은 대기 후 흡수하고, 이보다 큰 역행만 장애로 간주해 즉시 실패시킨다.
+    private static final long MAX_BACKWARD_CLOCK_DRIFT_MILLIS = 5L;
 
     private final long workerId;
 
@@ -32,7 +34,10 @@ class SnowflakeIdGenerator implements IdGenerator {
     public synchronized long generate() {
         long timestamp = System.currentTimeMillis();
         if (timestamp < lastTimestamp) {
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+            if (lastTimestamp - timestamp > MAX_BACKWARD_CLOCK_DRIFT_MILLIS) {
+                throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+            }
+            timestamp = waitNextMillis(lastTimestamp);
         }
         if (timestamp == lastTimestamp) {
             sequence = (sequence + 1) & MAX_SEQUENCE;
