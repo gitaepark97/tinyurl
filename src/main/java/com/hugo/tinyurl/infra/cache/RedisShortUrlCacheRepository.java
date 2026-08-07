@@ -1,6 +1,7 @@
-package com.hugo.tinyurl.domain.repository;
+package com.hugo.tinyurl.infra.cache;
 
 import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.port.ShortUrlCacheRepository;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
@@ -12,14 +13,14 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ShortUrlCacheRepository {
+class RedisShortUrlCacheRepository implements ShortUrlCacheRepository {
 
     private static final String KEY_PREFIX = "short-url:";
 
     private final RedisTemplate<String, ShortUrl> redisTemplate;
     private final Duration ttl;
 
-    public ShortUrlCacheRepository(
+    RedisShortUrlCacheRepository(
         RedisTemplate<String, ShortUrl> redisTemplate,
         @Value("${app.cache.short-url.expire-after-access-minutes}") long expireAfterAccessMinutes
     ) {
@@ -27,6 +28,7 @@ public class ShortUrlCacheRepository {
         this.ttl = Duration.ofMinutes(expireAfterAccessMinutes);
     }
 
+    @Override
     public Optional<ShortUrl> findByShortKey(String shortKey, Function<String, ShortUrl> loader) {
         String key = key(shortKey);
         ShortUrl cached = getFromCache(key);
@@ -41,6 +43,7 @@ public class ShortUrlCacheRepository {
         return Optional.ofNullable(loaded);
     }
 
+    @Override
     public void evict(String shortKey) {
         try {
             redisTemplate.delete(key(shortKey));

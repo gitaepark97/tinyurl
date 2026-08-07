@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.config;
+package com.hugo.tinyurl.infra.cache;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.hugo.tinyurl.domain.model.ShortUrl;
@@ -12,10 +12,10 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
-public class RedisConfig {
+class RedisConfig {
 
     @Bean
-    public RedisTemplate<String, ShortUrl> shortUrlRedisTemplate(RedisConnectionFactory connectionFactory, JsonMapper jsonMapper) {
+    RedisTemplate<String, ShortUrl> shortUrlRedisTemplate(RedisConnectionFactory connectionFactory, JsonMapper jsonMapper) {
         ObjectMapper objectMapper = jsonMapper.rebuild()
             .changeDefaultVisibility(visibility -> visibility
                 .withFieldVisibility(Visibility.ANY)
