@@ -5,9 +5,9 @@ import static org.awaitility.Awaitility.await;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ClickCount;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
+import com.hugo.tinyurl.domain.model.ClickCount;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class ClickEventManagerTest {
             assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, SHORT_URL_ID)).singleElement();
             assertThat(clickCountRepository.findById(SHORT_URL_ID))
                 .get()
-                .extracting(ClickCount::getCount)
+                .extracting(ClickCount::count)
                 .isEqualTo(1L);
         });
     }

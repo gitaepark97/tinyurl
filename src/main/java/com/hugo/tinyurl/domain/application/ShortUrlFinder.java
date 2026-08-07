@@ -1,12 +1,12 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
-import com.hugo.tinyurl.domain.entity.ClickCount;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.model.ClickCount;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClockProvider;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.domain.repository.ShortUrlCacheRepository;
-import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +43,14 @@ class ShortUrlFinder {
     @Transactional(readOnly = true)
     Page<ShortUrlWithClickCount> findAll(PageParam pageParam) {
         List<ShortUrl> overFetched = shortUrlRepository.findByIdLessThanOrderByIdDesc(
-            pageParam.cursorOrInitial(), PageRequest.of(0, pageParam.size() + 1));
+            pageParam.cursorOrInitial(), pageParam.size() + 1);
 
         boolean hasNext = overFetched.size() > pageParam.size();
         List<ShortUrl> shortUrls = hasNext ? overFetched.subList(0, pageParam.size()) : overFetched;
         Map<Long, Long> clickCounts = findClickCounts(shortUrls);
 
         List<ShortUrlWithClickCount> content = shortUrls.stream()
-            .map(shortUrl -> ShortUrlWithClickCount.of(shortUrl, clickCounts.getOrDefault(shortUrl.getId(), 0L)))
+            .map(shortUrl -> ShortUrlWithClickCount.of(shortUrl, clickCounts.getOrDefault(shortUrl.id(), 0L)))
             .toList();
         return Page.of(content, hasNext);
     }
@@ -60,8 +59,8 @@ class ShortUrlFinder {
     ShortUrlWithClickCount get(Long id) {
         ShortUrl shortUrl = shortUrlRepository.findById(id)
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
-        long clickCount = clickCountRepository.findById(shortUrl.getId())
-            .map(ClickCount::getCount)
+        long clickCount = clickCountRepository.findById(shortUrl.id())
+            .map(ClickCount::count)
             .orElse(0L);
 
         return ShortUrlWithClickCount.of(shortUrl, clickCount);
@@ -74,9 +73,9 @@ class ShortUrlFinder {
     }
 
     private Map<Long, Long> findClickCounts(List<ShortUrl> shortUrls) {
-        List<Long> shortUrlIds = shortUrls.stream().map(ShortUrl::getId).toList();
+        List<Long> shortUrlIds = shortUrls.stream().map(ShortUrl::id).toList();
         return clickCountRepository.findAllById(shortUrlIds).stream()
-            .collect(Collectors.toMap(ClickCount::getShortUrlId, ClickCount::getCount));
+            .collect(Collectors.toMap(ClickCount::shortUrlId, ClickCount::count));
     }
 
 }

@@ -9,9 +9,9 @@ import static org.mockito.Mockito.verify;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ClickCount;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
+import com.hugo.tinyurl.domain.model.ClickCount;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ class ClickEventRecorderTest {
         verify(clickEventRepository, times(3)).save(any());
         assertThat(clickCountRepository.findById(SHORT_URL_ID))
             .get()
-            .extracting(ClickCount::getCount)
+            .extracting(ClickCount::count)
             .isEqualTo(1L);
     }
 

@@ -6,11 +6,11 @@ import static org.awaitility.Awaitility.await;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ClickCount;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
-import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
+import com.hugo.tinyurl.domain.model.ClickCount;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import java.time.Duration;
@@ -46,9 +46,9 @@ class ShortUrlServiceTest {
     @AfterEach
     void cleanUp() {
         if (shortUrl != null) {
-            clickEventRepository.deleteAll(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId()));
-            clickCountRepository.deleteById(shortUrl.getId());
-            shortUrlRepository.deleteById(shortUrl.getId());
+            clickEventRepository.deleteAll(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.id()));
+            clickCountRepository.deleteById(shortUrl.id());
+            shortUrlRepository.deleteById(shortUrl.id());
         }
     }
 
@@ -57,7 +57,7 @@ class ShortUrlServiceTest {
         shortUrl = shortUrlService.create("https://example.com");
         String oversizedUserAgent = "A".repeat(600);
 
-        String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", oversizedUserAgent, null);
+        String originalUrl = shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", oversizedUserAgent, null);
 
         assertThat(originalUrl).isEqualTo("https://example.com");
     }
@@ -66,18 +66,18 @@ class ShortUrlServiceTest {
     void redirectRecordsClickEventOnSuccess() {
         shortUrl = shortUrlService.create("https://example.com");
 
-        String originalUrl = shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
+        String originalUrl = shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
 
         assertThat(originalUrl).isEqualTo("https://example.com");
         await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
-            assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).singleElement().satisfies(event -> {
-                assertThat(event.getIpAddress()).isEqualTo("127.0.0.1");
-                assertThat(event.getUserAgent()).isEqualTo("test-agent");
-                assertThat(event.getReferer()).isEqualTo("https://referer.example.com");
+            assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.id())).singleElement().satisfies(event -> {
+                assertThat(event.ipAddress()).isEqualTo("127.0.0.1");
+                assertThat(event.userAgent()).isEqualTo("test-agent");
+                assertThat(event.referer()).isEqualTo("https://referer.example.com");
             });
-            assertThat(clickCountRepository.findById(shortUrl.getId()))
+            assertThat(clickCountRepository.findById(shortUrl.id()))
                 .get()
-                .extracting(ClickCount::getCount)
+                .extracting(ClickCount::count)
                 .isEqualTo(1L);
         });
     }
@@ -92,15 +92,16 @@ class ShortUrlServiceTest {
 
     @Test
     void throwsNotFoundForExpiredKeyWithoutRecordingClick() {
+        LocalDateTime now = LocalDateTime.now();
         shortUrl = shortUrlRepository.save(
-            new ShortUrl(shortKeyGenerator.generate(), "https://example.com", LocalDateTime.now().minusDays(1)));
+            new ShortUrl(null, shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
 
-        assertThatThrownBy(() -> shortUrlService.redirect(shortUrl.getShortKey(), "127.0.0.1", "test-agent", null))
+        assertThatThrownBy(() -> shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", "test-agent", null))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
-        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.getId())).isEmpty();
-        assertThat(clickCountRepository.findById(shortUrl.getId())).isEmpty();
+        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.id())).isEmpty();
+        assertThat(clickCountRepository.findById(shortUrl.id())).isEmpty();
     }
 
 }

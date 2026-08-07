@@ -1,8 +1,9 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
+import com.hugo.tinyurl.domain.model.ClickEvent;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.domain.port.ClockProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.resilience.annotation.Retryable;
@@ -16,11 +17,13 @@ class ClickEventRecorder {
 
     private final ClickEventRepository clickEventRepository;
     private final ClickCountRepository clickCountRepository;
+    private final ClockProvider clockProvider;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(includes = TransientDataAccessException.class, maxRetries = 2, delay = 200, multiplier = 2)
     void record(Long shortUrlId, String ipAddress, String userAgent, String referer) {
-        clickEventRepository.save(new ClickEvent(shortUrlId, ipAddress, userAgent, referer));
+        ClickEvent clickEvent = ClickEvent.create(shortUrlId, ipAddress, userAgent, referer, clockProvider.now());
+        clickEventRepository.save(clickEvent);
         clickCountRepository.increment(shortUrlId);
     }
 

@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.domain.repository;
 
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;

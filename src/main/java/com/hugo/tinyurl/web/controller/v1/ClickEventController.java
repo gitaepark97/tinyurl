@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.web.controller.v1;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
 import com.hugo.tinyurl.domain.application.ClickEventService;
+import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import com.hugo.tinyurl.support.response.ApiResponse;

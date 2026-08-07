@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +32,11 @@ public class ShortUrlService {
     public String redirect(String shortKey, String ipAddress, String userAgent, String referer) {
         ShortUrl shortUrl = shortUrlFinder.find(shortKey);
         try {
-            clickEventManager.record(shortUrl.getId(), ipAddress, userAgent, referer);
+            clickEventManager.record(shortUrl.id(), ipAddress, userAgent, referer);
         } catch (Exception e) {
-            log.error("클릭 이벤트 기록 실패 - shortUrlId={}", shortUrl.getId(), e);
+            log.error("클릭 이벤트 기록 실패 - shortUrlId={}", shortUrl.id(), e);
         }
-        return shortUrl.getOriginalUrl();
+        return shortUrl.originalUrl();
     }
 
 }

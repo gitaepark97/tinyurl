@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
+import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import lombok.RequiredArgsConstructor;

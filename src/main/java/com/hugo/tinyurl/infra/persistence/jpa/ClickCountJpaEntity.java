@@ -1,5 +1,6 @@
-package com.hugo.tinyurl.domain.entity;
+package com.hugo.tinyurl.infra.persistence.jpa;
 
+import com.hugo.tinyurl.domain.model.ClickCount;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "click_count")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ClickCount {
+public class ClickCountJpaEntity {
 
     @Id
     @Column(name = "short_url_id")
@@ -20,5 +21,9 @@ public class ClickCount {
 
     @Column(name = "count", nullable = false)
     private long count;
+
+    public ClickCount toDomain() {
+        return new ClickCount(shortUrlId, count);
+    }
 
 }

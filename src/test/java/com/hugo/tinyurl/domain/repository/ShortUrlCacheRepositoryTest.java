@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
@@ -30,7 +30,8 @@ class ShortUrlCacheRepositoryTest {
 
     @Test
     void cachesLoaderResultForSameKey() {
-        ShortUrl shortUrl = new ShortUrl("abc12345", "https://example.com", LocalDateTime.now().plusDays(7));
+        LocalDateTime now = LocalDateTime.now();
+        ShortUrl shortUrl = new ShortUrl(1L, "abc12345", "https://example.com", now.plusDays(7), now);
         AtomicInteger loadCount = new AtomicInteger();
 
         shortUrlCacheRepository.findByShortKey("abc12345", key -> {
@@ -66,7 +67,8 @@ class ShortUrlCacheRepositoryTest {
 
     @Test
     void returnsEmptyAfterEviction() {
-        ShortUrl shortUrl = new ShortUrl("evt12345", "https://example.com", LocalDateTime.now().plusDays(7));
+        LocalDateTime now = LocalDateTime.now();
+        ShortUrl shortUrl = new ShortUrl(2L, "evt12345", "https://example.com", now.plusDays(7), now);
         shortUrlCacheRepository.findByShortKey("evt12345", key -> shortUrl);
 
         shortUrlCacheRepository.evict("evt12345");

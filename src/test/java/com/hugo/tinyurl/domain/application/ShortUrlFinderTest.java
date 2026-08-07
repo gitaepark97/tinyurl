@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.repository.ClickCountRepository;
-import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
@@ -55,9 +55,9 @@ class ShortUrlFinderTest {
     void findsShortUrlByValidShortKey() {
         ShortUrl shortUrl = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
 
-        ShortUrl found = shortUrlFinder.find(shortUrl.getShortKey());
+        ShortUrl found = shortUrlFinder.find(shortUrl.shortKey());
 
-        assertThat(found.getId()).isEqualTo(shortUrl.getId());
+        assertThat(found.id()).isEqualTo(shortUrl.id());
     }
 
     @Test
@@ -72,7 +72,7 @@ class ShortUrlFinderTest {
     void throwsNotFoundForExpiredShortKey() {
         ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, createdShortUrlIds);
 
-        assertThatThrownBy(() -> shortUrlFinder.find(expired.getShortKey()))
+        assertThatThrownBy(() -> shortUrlFinder.find(expired.shortKey()))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
@@ -86,8 +86,8 @@ class ShortUrlFinderTest {
 
         Page<ShortUrlWithClickCount> page = shortUrlFinder.findAll(new PageParam(null, 2));
 
-        assertThat(page.content()).extracting(view -> view.shortUrl().getId())
-            .containsExactly(third.getId(), second.getId());
+        assertThat(page.content()).extracting(view -> view.shortUrl().id())
+            .containsExactly(third.id(), second.id());
         assertThat(page.hasNext()).isTrue();
     }
 
@@ -97,19 +97,19 @@ class ShortUrlFinderTest {
         ShortUrl second = ShortUrlTestSupport.create(shortUrlManager, "https://example.com/2", createdShortUrlIds);
         ShortUrlTestSupport.create(shortUrlManager, "https://example.com/3", createdShortUrlIds);
 
-        Page<ShortUrlWithClickCount> page = shortUrlFinder.findAll(new PageParam(second.getId(), 20));
+        Page<ShortUrlWithClickCount> page = shortUrlFinder.findAll(new PageParam(second.id(), 20));
 
-        assertThat(page.content()).extracting(view -> view.shortUrl().getId()).contains(first.getId());
-        assertThat(page.content()).extracting(view -> view.shortUrl().getId()).doesNotContain(second.getId());
+        assertThat(page.content()).extracting(view -> view.shortUrl().id()).contains(first.id());
+        assertThat(page.content()).extracting(view -> view.shortUrl().id()).doesNotContain(second.id());
     }
 
     @Test
     void findsByIdIncludingExpired() {
         ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, createdShortUrlIds);
 
-        ShortUrlWithClickCount found = shortUrlFinder.get(expired.getId());
+        ShortUrlWithClickCount found = shortUrlFinder.get(expired.id());
 
-        assertThat(found.shortUrl().getId()).isEqualTo(expired.getId());
+        assertThat(found.shortUrl().id()).isEqualTo(expired.id());
         assertThat(found.shortUrl().isExpired(LocalDateTime.now())).isTrue();
         assertThat(found.clickCount()).isZero();
     }
@@ -125,14 +125,14 @@ class ShortUrlFinderTest {
     @Test
     void getAndFindAllReflectClickCount() {
         ShortUrl shortUrl = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
-        clickCountRepository.increment(shortUrl.getId());
-        clickCountRepository.increment(shortUrl.getId());
+        clickCountRepository.increment(shortUrl.id());
+        clickCountRepository.increment(shortUrl.id());
 
-        ShortUrlWithClickCount found = shortUrlFinder.get(shortUrl.getId());
+        ShortUrlWithClickCount found = shortUrlFinder.get(shortUrl.id());
 
         assertThat(found.clickCount()).isEqualTo(2L);
         assertThat(shortUrlFinder.findAll(new PageParam(null, 20)).content())
-            .filteredOn(view -> view.shortUrl().getId().equals(shortUrl.getId()))
+            .filteredOn(view -> view.shortUrl().id().equals(shortUrl.id()))
             .singleElement()
             .extracting(ShortUrlWithClickCount::clickCount)
             .isEqualTo(2L);

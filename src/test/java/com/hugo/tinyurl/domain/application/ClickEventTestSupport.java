@@ -1,9 +1,8 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
+import com.hugo.tinyurl.domain.model.ClickEvent;
+import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import java.util.List;
-import org.springframework.data.domain.Pageable;
 
 final class ClickEventTestSupport {
 
@@ -11,7 +10,7 @@ final class ClickEventTestSupport {
     }
 
     static List<ClickEvent> findAllByShortUrlId(ClickEventRepository clickEventRepository, long shortUrlId) {
-        return clickEventRepository.findByShortUrlIdAndIdLessThanOrderByIdDesc(shortUrlId, Long.MAX_VALUE, Pageable.unpaged());
+        return clickEventRepository.findByShortUrlIdAndIdLessThanOrderByIdDesc(shortUrlId, Long.MAX_VALUE, Integer.MAX_VALUE);
     }
 
 }

@@ -1,6 +1,4 @@
-package com.hugo.tinyurl.domain.dto;
-
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+package com.hugo.tinyurl.domain.model;
 
 public record ShortUrlWithClickCount(
     ShortUrl shortUrl,

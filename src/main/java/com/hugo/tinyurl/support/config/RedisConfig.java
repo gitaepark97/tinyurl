@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.support.config;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

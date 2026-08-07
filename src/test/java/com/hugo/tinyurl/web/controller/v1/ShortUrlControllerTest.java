@@ -14,9 +14,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
 import com.hugo.tinyurl.domain.application.ShortUrlService;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
@@ -29,7 +29,6 @@ import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDoc
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ShortUrlController.class)
@@ -163,10 +162,8 @@ class ShortUrlControllerTest {
     }
 
     private ShortUrl newShortUrl(Long id, String shortKey, String originalUrl) {
-        ShortUrl shortUrl = new ShortUrl(shortKey, originalUrl, LocalDateTime.now().plusDays(7).truncatedTo(ChronoUnit.SECONDS));
-        ReflectionTestUtils.setField(shortUrl, "id", id);
-        ReflectionTestUtils.setField(shortUrl, "createdAt", LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
-        return shortUrl;
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        return new ShortUrl(id, shortKey, originalUrl, now.plusDays(7), now);
     }
 
 }

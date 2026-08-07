@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ClickEvent;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.repository.ClickEventRepository;
-import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
+import com.hugo.tinyurl.domain.model.ClickEvent;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import java.time.LocalDateTime;
@@ -44,9 +44,14 @@ class ClickEventServiceTest {
 
     private ShortUrl createShortUrl(LocalDateTime expiresAt) {
         ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl("cur" + (System.nanoTime() % 100000), "https://example.com", expiresAt));
-        createdShortUrlIds.add(shortUrl.getId());
+            new ShortUrl(null, "cur" + (System.nanoTime() % 100000), "https://example.com", expiresAt, LocalDateTime.now()));
+        createdShortUrlIds.add(shortUrl.id());
         return shortUrl;
+    }
+
+    private ClickEvent createClickEvent(Long shortUrlId, String ipAddress, String userAgent, String referer) {
+        return clickEventRepository.save(
+            new ClickEvent(null, shortUrlId, ipAddress, userAgent, referer, LocalDateTime.now()));
     }
 
     @Test
@@ -54,24 +59,24 @@ class ClickEventServiceTest {
         ShortUrl shortUrl = createShortUrl(LocalDateTime.now().plusDays(7));
         List<ClickEvent> saved = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            saved.add(clickEventRepository.save(new ClickEvent(shortUrl.getId(), "127.0.0.1", "agent", null)));
+            saved.add(createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null));
         }
 
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.getId(), new PageParam(null, 2));
+        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), new PageParam(null, 2));
 
-        assertThat(page.content()).extracting(ClickEvent::getId)
-            .containsExactly(saved.get(2).getId(), saved.get(1).getId());
+        assertThat(page.content()).extracting(ClickEvent::id)
+            .containsExactly(saved.get(2).id(), saved.get(1).id());
         assertThat(page.hasNext()).isTrue();
     }
 
     @Test
     void returnsHasNextFalseOnLastPage() {
         ShortUrl shortUrl = createShortUrl(LocalDateTime.now().plusDays(7));
-        ClickEvent event = clickEventRepository.save(new ClickEvent(shortUrl.getId(), "127.0.0.1", "agent", null));
+        ClickEvent event = createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null);
 
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.getId(), new PageParam(null, 20));
+        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), new PageParam(null, 20));
 
-        assertThat(page.content()).extracting(ClickEvent::getId).containsExactly(event.getId());
+        assertThat(page.content()).extracting(ClickEvent::id).containsExactly(event.id());
         assertThat(page.hasNext()).isFalse();
     }
 
@@ -80,23 +85,23 @@ class ClickEventServiceTest {
         ShortUrl shortUrl = createShortUrl(LocalDateTime.now().plusDays(7));
         List<ClickEvent> saved = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            saved.add(clickEventRepository.save(new ClickEvent(shortUrl.getId(), "127.0.0.1", "agent", null)));
+            saved.add(createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null));
         }
 
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.getId(), new PageParam(saved.get(1).getId(), 20));
+        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), new PageParam(saved.get(1).id(), 20));
 
-        assertThat(page.content()).extracting(ClickEvent::getId).containsExactly(saved.get(0).getId());
+        assertThat(page.content()).extracting(ClickEvent::id).containsExactly(saved.get(0).id());
         assertThat(page.hasNext()).isFalse();
     }
 
     @Test
     void returnsClickEventsForExpiredShortUrl() {
         ShortUrl expired = createShortUrl(LocalDateTime.now().minusDays(1));
-        ClickEvent event = clickEventRepository.save(new ClickEvent(expired.getId(), "127.0.0.1", "agent", null));
+        ClickEvent event = createClickEvent(expired.id(), "127.0.0.1", "agent", null);
 
-        Page<ClickEvent> page = clickEventService.findAll(expired.getId(), new PageParam(null, 20));
+        Page<ClickEvent> page = clickEventService.findAll(expired.id(), new PageParam(null, 20));
 
-        assertThat(page.content()).extracting(ClickEvent::getId).containsExactly(event.getId());
+        assertThat(page.content()).extracting(ClickEvent::id).containsExactly(event.id());
     }
 
     @Test

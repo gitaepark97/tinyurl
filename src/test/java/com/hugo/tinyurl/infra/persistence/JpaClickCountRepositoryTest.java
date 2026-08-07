@@ -1,10 +1,11 @@
-package com.hugo.tinyurl.domain.repository;
+package com.hugo.tinyurl.infra.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ClickCount;
+import com.hugo.tinyurl.domain.model.ClickCount;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -20,7 +21,7 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @Import(TestcontainersConfiguration.class)
-class ClickCountRepositoryTest {
+class JpaClickCountRepositoryTest {
 
     private static final long SHORT_URL_ID = 1L;
 
@@ -56,7 +57,7 @@ class ClickCountRepositoryTest {
 
         assertThat(clickCountRepository.findById(SHORT_URL_ID))
             .get()
-            .extracting(ClickCount::getCount)
+            .extracting(ClickCount::count)
             .isEqualTo((long) threads);
     }
 

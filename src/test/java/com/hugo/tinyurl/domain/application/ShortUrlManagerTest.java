@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
-import com.hugo.tinyurl.domain.repository.ShortUrlRepository;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +41,10 @@ class ShortUrlManagerTest {
         ShortUrl shortUrl = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
 
         LocalDateTime afterCreate = LocalDateTime.now();
-        assertThat(shortUrl.getShortKey()).hasSize(8);
-        assertThat(shortUrl.getOriginalUrl()).isEqualTo("https://example.com");
+        assertThat(shortUrl.shortKey()).hasSize(8);
+        assertThat(shortUrl.originalUrl()).isEqualTo("https://example.com");
         assertThat(shortUrl.isExpired(LocalDateTime.now())).isFalse();
-        assertThat(shortUrl.getExpiresAt()).isBetween(beforeCreate.plusDays(7), afterCreate.plusDays(7));
+        assertThat(shortUrl.expiresAt()).isBetween(beforeCreate.plusDays(7), afterCreate.plusDays(7));
     }
 
     @Test
@@ -52,7 +52,7 @@ class ShortUrlManagerTest {
         ShortUrl first = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
         ShortUrl second = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
 
-        assertThat(first.getShortKey()).isNotEqualTo(second.getShortKey());
+        assertThat(first.shortKey()).isNotEqualTo(second.shortKey());
     }
 
 }

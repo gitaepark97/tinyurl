@@ -1,5 +1,6 @@
-package com.hugo.tinyurl.domain.entity;
+package com.hugo.tinyurl.infra.persistence.jpa;
 
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,13 +11,12 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "short_url")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ShortUrl {
+public class ShortUrlJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,18 +31,24 @@ public class ShortUrl {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public ShortUrl(String shortKey, String originalUrl, LocalDateTime expiresAt) {
+    public ShortUrlJpaEntity(Long id, String shortKey, String originalUrl, LocalDateTime expiresAt, LocalDateTime createdAt) {
+        this.id = id;
         this.shortKey = shortKey;
         this.originalUrl = originalUrl;
         this.expiresAt = expiresAt;
+        this.createdAt = createdAt;
     }
 
-    public boolean isExpired(LocalDateTime now) {
-        return expiresAt.isBefore(now);
+    public static ShortUrlJpaEntity from(ShortUrl shortUrl) {
+        return new ShortUrlJpaEntity(
+            shortUrl.id(), shortUrl.shortKey(), shortUrl.originalUrl(), shortUrl.expiresAt(), shortUrl.createdAt());
+    }
+
+    public ShortUrl toDomain() {
+        return new ShortUrl(id, shortKey, originalUrl, expiresAt, createdAt);
     }
 
 }
