@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.web.controller.v1.response;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
+import com.hugo.tinyurl.domain.model.ClickEvent;
 import java.time.LocalDateTime;
 
 public record ClickEventResponse(
@@ -13,11 +13,11 @@ public record ClickEventResponse(
 
     public static ClickEventResponse from(ClickEvent clickEvent) {
         return new ClickEventResponse(
-            clickEvent.getId(),
-            clickEvent.getIpAddress(),
-            clickEvent.getUserAgent(),
-            clickEvent.getReferer(),
-            clickEvent.getClickedAt()
+            clickEvent.id(),
+            clickEvent.ipAddress(),
+            clickEvent.userAgent(),
+            clickEvent.referer(),
+            clickEvent.clickedAt()
         );
     }
 

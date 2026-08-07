@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.web.controller.v1.response;
 
-import com.hugo.tinyurl.domain.dto.ShortUrlWithClickCount;
-import com.hugo.tinyurl.domain.entity.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import java.time.LocalDateTime;
 
 public record ShortUrlResponse(
@@ -17,13 +17,13 @@ public record ShortUrlResponse(
     public static ShortUrlResponse from(ShortUrlWithClickCount view, String baseUrl) {
         ShortUrl shortUrl = view.shortUrl();
         return new ShortUrlResponse(
-            shortUrl.getId(),
-            shortUrl.getShortKey(),
-            baseUrl + "/" + shortUrl.getShortKey(),
-            shortUrl.getOriginalUrl(),
+            shortUrl.id(),
+            shortUrl.shortKey(),
+            baseUrl + "/" + shortUrl.shortKey(),
+            shortUrl.originalUrl(),
             view.clickCount(),
-            shortUrl.getExpiresAt(),
-            shortUrl.getCreatedAt()
+            shortUrl.expiresAt(),
+            shortUrl.createdAt()
         );
     }
 

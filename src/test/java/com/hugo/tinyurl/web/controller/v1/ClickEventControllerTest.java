@@ -13,16 +13,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.hugo.tinyurl.domain.entity.ClickEvent;
-import com.hugo.tinyurl.domain.service.ClickEventService;
+import com.hugo.tinyurl.domain.application.ClickEventService;
+import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.support.page.Page;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ClickEventController.class)
@@ -81,9 +81,7 @@ class ClickEventControllerTest {
     }
 
     private ClickEvent newClickEvent(Long id, String ipAddress, String userAgent, String referer) {
-        ClickEvent event = new ClickEvent(1L, ipAddress, userAgent, referer);
-        ReflectionTestUtils.setField(event, "id", id);
-        return event;
+        return new ClickEvent(id, 1L, ipAddress, userAgent, referer, LocalDateTime.now());
     }
 
 }
