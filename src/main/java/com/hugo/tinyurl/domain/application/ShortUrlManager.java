@@ -27,7 +27,8 @@ class ShortUrlManager {
         try {
             return shortUrlRepository.save(shortUrl);
         } catch (DataIntegrityViolationException e) {
-            log.error("short_key 충돌 발생 - shortKey={}", shortKey, e);
+            // short_key 또는 PK(id) unique 제약 위반 중 하나이며, 이 예외만으로는 구분할 수 없다.
+            log.error("ShortUrl 저장 실패 - id={}, shortKey={}", shortUrl.id(), shortKey, e);
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e);
         }
     }
