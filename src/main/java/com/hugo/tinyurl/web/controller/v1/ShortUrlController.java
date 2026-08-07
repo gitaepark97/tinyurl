@@ -8,10 +8,12 @@ import com.hugo.tinyurl.support.page.PageParam;
 import com.hugo.tinyurl.support.response.ApiResponse;
 import com.hugo.tinyurl.web.controller.v1.request.ShortUrlCreateRequest;
 import com.hugo.tinyurl.web.controller.v1.response.ShortUrlResponse;
+import com.hugo.tinyurl.web.security.AuthenticatedMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,8 +33,9 @@ class ShortUrlController {
 
     @PostMapping("/api/v1/urls")
     @ResponseStatus(HttpStatus.CREATED)
-    ApiResponse<ShortUrlResponse> create(@Valid @RequestBody ShortUrlCreateRequest request) {
-        ShortUrl shortUrl = shortUrlService.create(request.originalUrl());
+    ApiResponse<ShortUrlResponse> create(@Valid @RequestBody ShortUrlCreateRequest request, Authentication authentication) {
+        ShortUrl shortUrl = shortUrlService.create(
+            memberId(authentication), request.originalUrl(), request.customAlias(), request.expiresAt());
         return ApiResponse.success(ShortUrlResponse.from(ShortUrlWithClickCount.of(shortUrl, 0L), baseUrl));
     }
 
@@ -46,6 +49,13 @@ class ShortUrlController {
     ApiResponse<ShortUrlResponse> find(@PathVariable Long id) {
         ShortUrlWithClickCount view = shortUrlService.find(id);
         return ApiResponse.success(ShortUrlResponse.from(view, baseUrl));
+    }
+
+    private Long memberId(Authentication authentication) {
+        if (authentication != null && authentication.getPrincipal() instanceof AuthenticatedMember authenticatedMember) {
+            return authenticatedMember.memberId();
+        }
+        return null;
     }
 
 }

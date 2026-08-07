@@ -43,3 +43,23 @@ private ShortUrl findValidByShortKey(String shortKey) {      // private, 맨 아
 - 같은 접근 제어자 안에서의 순서는 강제하지 않는다(호출 순서/의미적 그룹핑 등 자유롭게 판단).
 - 필드/메서드 정렬은 새로 작성하거나 수정하는 클래스에 적용한다. 기존 코드를 이 컨벤션만을
   위해 일괄로 리팩터링하지는 않는다.
+
+## 파라미터가 많은 메서드
+
+메서드 시그니처가 한 줄에 들어가지 않아 줄바꿈이 필요하면, 파라미터를 한 줄에 몰아서 감싸지
+않고 파라미터마다 한 줄씩 쓴다.
+
+```java
+public static ShortUrl createForMember(
+    Long id,
+    String shortKey,
+    String originalUrl,
+    Long memberId,
+    LocalDateTime expiresAt,
+    LocalDateTime now
+) {
+    ...
+}
+```
+
+한 줄에 다 들어가는 시그니처는 파라미터 개수와 무관하게 줄바꿈하지 않는다.

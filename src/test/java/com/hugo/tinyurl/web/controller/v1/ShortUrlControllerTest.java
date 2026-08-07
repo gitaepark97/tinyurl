@@ -2,7 +2,9 @@ package com.hugo.tinyurl.web.controller.v1;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
@@ -15,29 +17,34 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.hugo.tinyurl.domain.application.ShortUrlService;
+import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
+import com.hugo.tinyurl.web.security.ApiAccessDeniedHandler;
+import com.hugo.tinyurl.web.security.ApiAuthenticationEntryPoint;
+import com.hugo.tinyurl.web.security.AuthenticatedMember;
+import com.hugo.tinyurl.web.security.SecurityConfig;
 import com.hugo.tinyurl.web.security.TokenProvider;
+import io.jsonwebtoken.Claims;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-// 이 컨트롤러는 인가 규칙을 다루지 않으므로 보안 필터 체인을 아예 적용하지 않는다 - 적용하면
-// 커스텀 SecurityConfig가 없는 이 슬라이스에서 Spring Boot 기본 보안 설정(CSRF 등)으로 대체돼
-// 무관한 요청까지 막힌다.
+// 인증 여부로 분기하는 로직을 검증해야 해서 실제 SecurityConfig를 끌어와 필터 체인을 적용한다.
 @WebMvcTest(controllers = ShortUrlController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@Import({SecurityConfig.class, ApiAuthenticationEntryPoint.class, ApiAccessDeniedHandler.class})
 @AutoConfigureRestDocs
 class ShortUrlControllerTest {
 
@@ -47,15 +54,13 @@ class ShortUrlControllerTest {
     @MockitoBean
     ShortUrlService shortUrlService;
 
-    // JwtAuthenticationFilter(Filter 타입)는 @WebMvcTest가 그대로 빈으로 끌어온다 - addFilters=false로
-    // 실행은 막아도 빈 생성 자체엔 TokenProvider가 필요하다.
     @MockitoBean
     TokenProvider tokenProvider;
 
     @Test
     void createsShortUrl() throws Exception {
         ShortUrl shortUrl = newShortUrl(1L, "abc12345", "https://example.com");
-        given(shortUrlService.create(any())).willReturn(shortUrl);
+        given(shortUrlService.create(isNull(), eq("https://example.com"), isNull(), isNull())).willReturn(shortUrl);
 
         mockMvc.perform(post("/api/v1/urls")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -75,6 +80,36 @@ class ShortUrlControllerTest {
                     fieldWithPath("data.createdAt").description("생성 일시"),
                     fieldWithPath("message").description("에러 메시지(성공 시 null)")
                 )));
+    }
+
+    @Test
+    void createsShortUrlForMemberWithCustomAliasAndExpiresAt() throws Exception {
+        ShortUrl shortUrl = newMemberShortUrl(1L, "myalias1", "https://example.com", 10L);
+        given(shortUrlService.create(eq(10L), eq("https://example.com"), eq("myalias1"), any())).willReturn(shortUrl);
+        Claims claims = mock(Claims.class);
+        given(tokenProvider.parse("member-access-token")).willReturn(claims);
+        given(tokenProvider.isAccessToken(claims)).willReturn(true);
+        given(tokenProvider.toAuthenticatedMember(claims)).willReturn(new AuthenticatedMember(10L, Role.MEMBER));
+        String expiresAt = LocalDateTime.now().plusDays(5).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        mockMvc.perform(post("/api/v1/urls")
+                .header("Authorization", "Bearer member-access-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"originalUrl\":\"https://example.com\",\"customAlias\":\"myalias1\",\"expiresAt\":\"" + expiresAt + "\"}"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.data.shortKey").value("myalias1"));
+    }
+
+    @Test
+    void rejectsCustomAliasFromAnonymousUser() throws Exception {
+        given(shortUrlService.create(isNull(), eq("https://example.com"), eq("myalias1"), isNull()))
+            .willThrow(new BusinessException(ErrorCode.FORBIDDEN));
+
+        mockMvc.perform(post("/api/v1/urls")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"originalUrl\":\"https://example.com\",\"customAlias\":\"myalias1\"}"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
     }
 
     @Test
@@ -174,7 +209,12 @@ class ShortUrlControllerTest {
 
     private ShortUrl newShortUrl(Long id, String shortKey, String originalUrl) {
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        return new ShortUrl(id, shortKey, originalUrl, now.plusDays(7), now);
+        return new ShortUrl(id, shortKey, originalUrl, null, now.plusDays(7), now);
+    }
+
+    private ShortUrl newMemberShortUrl(Long id, String shortKey, String originalUrl, Long memberId) {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        return new ShortUrl(id, shortKey, originalUrl, memberId, now.plusDays(5), now);
     }
 
 }

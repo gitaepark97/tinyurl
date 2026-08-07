@@ -48,7 +48,7 @@ class ClickEventServiceTest {
 
     private ShortUrl createShortUrl(LocalDateTime expiresAt) {
         ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl(idGenerator.generate(), "cur" + (System.nanoTime() % 100000), "https://example.com", expiresAt,
+            new ShortUrl(idGenerator.generate(), "cur" + (System.nanoTime() % 100000), "https://example.com", null, expiresAt,
                 LocalDateTime.now()));
         createdShortUrlIds.add(shortUrl.id());
         return shortUrl;

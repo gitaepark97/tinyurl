@@ -4,6 +4,7 @@ import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ public class ShortUrlService {
     private final ClickEventManager clickEventManager;
 
     public ShortUrl create(String originalUrl) {
-        return shortUrlManager.create(originalUrl);
+        return shortUrlManager.create(null, originalUrl, null, null);
+    }
+
+    public ShortUrl create(Long memberId, String originalUrl, String customAlias, LocalDateTime expiresAt) {
+        return shortUrlManager.create(memberId, originalUrl, customAlias, expiresAt);
     }
 
     public Page<ShortUrlWithClickCount> findAll(PageParam pageParam) {

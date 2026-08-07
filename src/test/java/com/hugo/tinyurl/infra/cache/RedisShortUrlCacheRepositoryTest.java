@@ -32,7 +32,7 @@ class RedisShortUrlCacheRepositoryTest {
     @Test
     void cachesLoaderResultForSameKey() {
         LocalDateTime now = LocalDateTime.now();
-        ShortUrl shortUrl = new ShortUrl(1L, "abc12345", "https://example.com", now.plusDays(7), now);
+        ShortUrl shortUrl = new ShortUrl(1L, "abc12345", "https://example.com", null, now.plusDays(7), now);
         AtomicInteger loadCount = new AtomicInteger();
 
         shortUrlCacheRepository.findByShortKey("abc12345", key -> {
@@ -69,7 +69,7 @@ class RedisShortUrlCacheRepositoryTest {
     @Test
     void returnsEmptyAfterEviction() {
         LocalDateTime now = LocalDateTime.now();
-        ShortUrl shortUrl = new ShortUrl(2L, "evt12345", "https://example.com", now.plusDays(7), now);
+        ShortUrl shortUrl = new ShortUrl(2L, "evt12345", "https://example.com", null, now.plusDays(7), now);
         shortUrlCacheRepository.findByShortKey("evt12345", key -> shortUrl);
 
         shortUrlCacheRepository.evict("evt12345");
