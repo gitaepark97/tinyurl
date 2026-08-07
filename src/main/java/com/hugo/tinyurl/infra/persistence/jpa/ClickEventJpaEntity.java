@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Persistable;
 
 @Entity
 @Table(name = "click_event")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ClickEventJpaEntity implements Persistable<Long> {
+public class ClickEventJpaEntity extends AppendOnlyJpaEntity<Long> {
 
     @Id
     private Long id;
@@ -52,11 +51,6 @@ public class ClickEventJpaEntity implements Persistable<Long> {
 
     public ClickEvent toDomain() {
         return new ClickEvent(id, shortUrlId, ipAddress, userAgent, referer, clickedAt);
-    }
-
-    @Override
-    public boolean isNew() {
-        return true;
     }
 
 }

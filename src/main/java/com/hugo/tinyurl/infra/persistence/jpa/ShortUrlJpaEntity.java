@@ -9,13 +9,12 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Persistable;
 
 @Entity
 @Table(name = "short_url")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ShortUrlJpaEntity implements Persistable<Long> {
+public class ShortUrlJpaEntity extends AppendOnlyJpaEntity<Long> {
 
     @Id
     private Long id;
@@ -47,11 +46,6 @@ public class ShortUrlJpaEntity implements Persistable<Long> {
 
     public ShortUrl toDomain() {
         return new ShortUrl(id, shortKey, originalUrl, expiresAt, createdAt);
-    }
-
-    @Override
-    public boolean isNew() {
-        return true;
     }
 
 }
