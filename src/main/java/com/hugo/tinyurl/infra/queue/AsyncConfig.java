@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.config;
+package com.hugo.tinyurl.infra.queue;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
