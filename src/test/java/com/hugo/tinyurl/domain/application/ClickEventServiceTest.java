@@ -7,6 +7,7 @@ import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
@@ -33,6 +34,9 @@ class ClickEventServiceTest {
     @Autowired
     ClickEventRepository clickEventRepository;
 
+    @Autowired
+    IdGenerator idGenerator;
+
     private final List<Long> createdShortUrlIds = new ArrayList<>();
 
     @AfterEach
@@ -44,14 +48,15 @@ class ClickEventServiceTest {
 
     private ShortUrl createShortUrl(LocalDateTime expiresAt) {
         ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl(null, "cur" + (System.nanoTime() % 100000), "https://example.com", expiresAt, LocalDateTime.now()));
+            new ShortUrl(idGenerator.generate(), "cur" + (System.nanoTime() % 100000), "https://example.com", expiresAt,
+                LocalDateTime.now()));
         createdShortUrlIds.add(shortUrl.id());
         return shortUrl;
     }
 
     private ClickEvent createClickEvent(Long shortUrlId, String ipAddress, String userAgent, String referer) {
         return clickEventRepository.save(
-            new ClickEvent(null, shortUrlId, ipAddress, userAgent, referer, LocalDateTime.now()));
+            new ClickEvent(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, LocalDateTime.now()));
     }
 
     @Test

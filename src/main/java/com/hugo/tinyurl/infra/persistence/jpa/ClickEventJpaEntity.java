@@ -3,23 +3,21 @@ package com.hugo.tinyurl.infra.persistence.jpa;
 import com.hugo.tinyurl.domain.model.ClickEvent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @Table(name = "click_event")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ClickEventJpaEntity {
+public class ClickEventJpaEntity implements Persistable<Long> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "short_url_id", nullable = false)
@@ -54,6 +52,11 @@ public class ClickEventJpaEntity {
 
     public ClickEvent toDomain() {
         return new ClickEvent(id, shortUrlId, ipAddress, userAgent, referer, clickedAt);
+    }
+
+    @Override
+    public boolean isNew() {
+        return true;
     }
 
 }

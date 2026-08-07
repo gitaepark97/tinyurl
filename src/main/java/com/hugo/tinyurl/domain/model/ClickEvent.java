@@ -11,8 +11,8 @@ public record ClickEvent(
     LocalDateTime clickedAt
 ) {
 
-    public static ClickEvent create(Long shortUrlId, String ipAddress, String userAgent, String referer, LocalDateTime now) {
-        return new ClickEvent(null, shortUrlId, ipAddress, userAgent, referer, now);
+    public static ClickEvent create(Long id, Long shortUrlId, String ipAddress, String userAgent, String referer, LocalDateTime now) {
+        return new ClickEvent(id, shortUrlId, ipAddress, userAgent, referer, now);
     }
 
 }

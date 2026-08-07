@@ -8,6 +8,7 @@ import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
+import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
@@ -42,6 +43,9 @@ class ShortUrlFinderTest {
     @Autowired
     ShortKeyGenerator shortKeyGenerator;
 
+    @Autowired
+    IdGenerator idGenerator;
+
     private final List<Long> createdShortUrlIds = new ArrayList<>();
 
     @AfterEach
@@ -70,7 +74,7 @@ class ShortUrlFinderTest {
 
     @Test
     void throwsNotFoundForExpiredShortKey() {
-        ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, createdShortUrlIds);
+        ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, idGenerator, createdShortUrlIds);
 
         assertThatThrownBy(() -> shortUrlFinder.find(expired.shortKey()))
             .isInstanceOf(BusinessException.class)
@@ -105,7 +109,7 @@ class ShortUrlFinderTest {
 
     @Test
     void findsByIdIncludingExpired() {
-        ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, createdShortUrlIds);
+        ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, idGenerator, createdShortUrlIds);
 
         ShortUrlWithClickCount found = shortUrlFinder.get(expired.id());
 

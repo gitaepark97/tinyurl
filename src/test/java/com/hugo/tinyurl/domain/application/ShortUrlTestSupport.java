@@ -1,6 +1,7 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,11 +18,12 @@ final class ShortUrlTestSupport {
     }
 
     static ShortUrl createExpired(
-        ShortUrlRepository shortUrlRepository, ShortKeyGenerator shortKeyGenerator, List<Long> createdShortUrlIds
+        ShortUrlRepository shortUrlRepository, ShortKeyGenerator shortKeyGenerator, IdGenerator idGenerator,
+        List<Long> createdShortUrlIds
     ) {
         LocalDateTime now = LocalDateTime.now();
         ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl(null, shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
+            new ShortUrl(idGenerator.generate(), shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
         createdShortUrlIds.add(shortUrl.id());
         return shortUrl;
     }

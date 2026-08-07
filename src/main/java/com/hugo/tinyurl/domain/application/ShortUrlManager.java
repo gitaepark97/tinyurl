@@ -2,6 +2,7 @@ package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ClockProvider;
+import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
@@ -17,11 +18,12 @@ class ShortUrlManager {
 
     private final ShortUrlRepository shortUrlRepository;
     private final ClockProvider clockProvider;
+    private final IdGenerator idGenerator;
     private final ShortKeyGenerator shortKeyGenerator;
 
     ShortUrl create(String originalUrl) {
         String shortKey = shortKeyGenerator.generate();
-        ShortUrl shortUrl = ShortUrl.create(shortKey, originalUrl, clockProvider.now());
+        ShortUrl shortUrl = ShortUrl.create(idGenerator.generate(), shortKey, originalUrl, clockProvider.now());
         try {
             return shortUrlRepository.save(shortUrl);
         } catch (DataIntegrityViolationException e) {

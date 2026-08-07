@@ -10,6 +10,7 @@ import com.hugo.tinyurl.domain.model.ClickCount;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
@@ -40,6 +41,9 @@ class ShortUrlServiceTest {
 
     @Autowired
     ShortKeyGenerator shortKeyGenerator;
+
+    @Autowired
+    IdGenerator idGenerator;
 
     ShortUrl shortUrl;
 
@@ -94,7 +98,7 @@ class ShortUrlServiceTest {
     void throwsNotFoundForExpiredKeyWithoutRecordingClick() {
         LocalDateTime now = LocalDateTime.now();
         shortUrl = shortUrlRepository.save(
-            new ShortUrl(null, shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
+            new ShortUrl(idGenerator.generate(), shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
 
         assertThatThrownBy(() -> shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", "test-agent", null))
             .isInstanceOf(BusinessException.class)
