@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.time;
+package com.hugo.tinyurl.domain.port;
 
 import java.time.LocalDateTime;
 

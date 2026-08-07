@@ -1,5 +1,6 @@
-package com.hugo.tinyurl.support.time;
+package com.hugo.tinyurl.support.provider;
 
+import com.hugo.tinyurl.domain.port.ClockProvider;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
