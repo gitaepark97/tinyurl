@@ -9,6 +9,7 @@ import org.apache.curator.framework.recipes.atomic.PromotedToLock;
 import org.apache.curator.retry.BoundedExponentialBackoffRetry;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +21,6 @@ class ZookeeperConfig {
     private static final String SHORT_KEY_COUNTER_LOCK_PATH = "/tinyurl/short-key-counter-lock";
     private static final String WORKER_ID_PATH_PREFIX = "/tinyurl/id-generator/workers/worker-";
     private static final int CONNECT_TIMEOUT_SECONDS = 10;
-    private static final long MAX_WORKER_ID = 1023L; // IdGenerator 구현체의 worker-id 비트폭(10bit)과 맞춤
 
     private static final RetryPolicy RETRY_POLICY = new RetryNTimes(3, 100);
     // 뮤텍스로 승격된 뒤에는 포기하지 않고 기다리는 게 맞으므로, 연결/낙관적 CAS용 RETRY_POLICY보다
@@ -46,12 +46,21 @@ class ZookeeperConfig {
 
     @Bean
     long workerId(CuratorFramework curatorFramework) throws Exception {
-        String createdPath = curatorFramework.create()
-            .creatingParentsIfNeeded()
-            .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
-            .forPath(WORKER_ID_PATH_PREFIX);
-        long sequence = Long.parseLong(createdPath.substring(createdPath.lastIndexOf('-') + 1));
-        return sequence % (MAX_WORKER_ID + 1);
+        // 0~MAX_WORKER_ID 슬롯 중 비어있는 첫 번째를 EPHEMERAL 노드로 선점한다.
+        // 세션 종료(정상 종료/크래시) 시 노드가 자동 삭제되어 슬롯이 즉시 재사용되므로,
+        // 계속 증가하기만 하는 시퀀스 번호를 쓰는 방식과 달리 재시작이 누적돼도 worker-id가 wrap되지 않는다.
+        for (long id = 0; id <= SnowflakeIdGenerator.MAX_WORKER_ID; id++) {
+            try {
+                curatorFramework.create()
+                    .creatingParentsIfNeeded()
+                    .withMode(CreateMode.EPHEMERAL)
+                    .forPath(WORKER_ID_PATH_PREFIX + id);
+                return id;
+            } catch (KeeperException.NodeExistsException e) {
+                // 다른 인스턴스가 이미 점유한 슬롯 -> 다음 슬롯 시도
+            }
+        }
+        throw new IllegalStateException("사용 가능한 worker-id가 없습니다 - max=" + SnowflakeIdGenerator.MAX_WORKER_ID);
     }
 
     private void awaitConnection(CuratorFramework client, String connectString) {

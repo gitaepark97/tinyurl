@@ -11,7 +11,7 @@ class SnowflakeIdGenerator implements IdGenerator {
     private static final long EPOCH = 1767225600000L; // 2026-01-01T00:00:00Z
     private static final long WORKER_ID_BITS = 10L;
     private static final long SEQUENCE_BITS = 12L;
-    private static final long MAX_WORKER_ID = (1L << WORKER_ID_BITS) - 1;
+    static final long MAX_WORKER_ID = (1L << WORKER_ID_BITS) - 1;
     private static final long MAX_SEQUENCE = (1L << SEQUENCE_BITS) - 1;
     private static final long WORKER_ID_SHIFT = SEQUENCE_BITS;
     private static final long TIMESTAMP_SHIFT = SEQUENCE_BITS + WORKER_ID_BITS;
