@@ -1,6 +1,7 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.ClickCount;
+import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
@@ -44,21 +45,23 @@ class ShortUrlFinder {
     Page<ShortUrlWithClickCount> findAll(PageParam pageParam) {
         List<ShortUrl> overFetched = shortUrlRepository.findByIdLessThanOrderByIdDesc(
             pageParam.cursorOrInitial(), pageParam.size() + 1);
-
-        boolean hasNext = overFetched.size() > pageParam.size();
-        List<ShortUrl> shortUrls = hasNext ? overFetched.subList(0, pageParam.size()) : overFetched;
-        Map<Long, Long> clickCounts = findClickCounts(shortUrls);
-
-        List<ShortUrlWithClickCount> content = shortUrls.stream()
-            .map(shortUrl -> ShortUrlWithClickCount.of(shortUrl, clickCounts.getOrDefault(shortUrl.id(), 0L)))
-            .toList();
-        return Page.of(content, hasNext);
+        return toPage(overFetched, pageParam);
     }
 
     @Transactional(readOnly = true)
-    ShortUrlWithClickCount get(Long id) {
+    Page<ShortUrlWithClickCount> findAllByMember(Long memberId, PageParam pageParam) {
+        List<ShortUrl> overFetched = shortUrlRepository.findByMemberIdAndIdLessThanOrderByIdDesc(
+            memberId, pageParam.cursorOrInitial(), pageParam.size() + 1);
+        return toPage(overFetched, pageParam);
+    }
+
+    @Transactional(readOnly = true)
+    ShortUrlWithClickCount get(Long id, Long requesterMemberId, Role requesterRole) {
         ShortUrl shortUrl = shortUrlRepository.findById(id)
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        if (requesterRole != Role.ADMIN && !shortUrl.isOwnedBy(requesterMemberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         long clickCount = clickCountRepository.findById(shortUrl.id())
             .map(ClickCount::count)
             .orElse(0L);
@@ -70,6 +73,17 @@ class ShortUrlFinder {
         return shortUrlRepository.findByShortKey(shortKey)
             .filter(url -> !url.isExpired(clockProvider.now()))
             .orElse(null);
+    }
+
+    private Page<ShortUrlWithClickCount> toPage(List<ShortUrl> overFetched, PageParam pageParam) {
+        boolean hasNext = overFetched.size() > pageParam.size();
+        List<ShortUrl> shortUrls = hasNext ? overFetched.subList(0, pageParam.size()) : overFetched;
+        Map<Long, Long> clickCounts = findClickCounts(shortUrls);
+
+        List<ShortUrlWithClickCount> content = shortUrls.stream()
+            .map(shortUrl -> ShortUrlWithClickCount.of(shortUrl, clickCounts.getOrDefault(shortUrl.id(), 0L)))
+            .toList();
+        return Page.of(content, hasNext);
     }
 
     private Map<Long, Long> findClickCounts(List<ShortUrl> shortUrls) {

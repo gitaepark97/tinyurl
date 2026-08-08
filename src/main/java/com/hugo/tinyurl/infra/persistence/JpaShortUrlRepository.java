@@ -39,6 +39,13 @@ class JpaShortUrlRepository implements ShortUrlRepository {
     }
 
     @Override
+    public List<ShortUrl> findByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long id, int limit) {
+        return shortUrlEntityRepository.findByMemberIdAndIdLessThanOrderByIdDesc(memberId, id, PageRequest.of(0, limit)).stream()
+            .map(ShortUrlJpaEntity::toDomain)
+            .toList();
+    }
+
+    @Override
     public void deleteById(Long id) {
         // isNew()가 항상 true인 AppendOnlyJpaEntity는 일반 deleteById()가 조용히 무효화되므로
         // (SimpleJpaRepository.doDelete()의 isNew() 가드) 벌크 삭제로 우회한다.

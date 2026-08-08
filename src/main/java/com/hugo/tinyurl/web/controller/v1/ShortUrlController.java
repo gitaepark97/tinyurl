@@ -1,8 +1,11 @@
 package com.hugo.tinyurl.web.controller.v1;
 
 import com.hugo.tinyurl.domain.application.ShortUrlService;
+import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
+import com.hugo.tinyurl.support.exception.BusinessException;
+import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import com.hugo.tinyurl.support.response.ApiResponse;
@@ -34,8 +37,8 @@ class ShortUrlController {
     @PostMapping("/api/v1/urls")
     @ResponseStatus(HttpStatus.CREATED)
     ApiResponse<ShortUrlResponse> create(@Valid @RequestBody ShortUrlCreateRequest request, Authentication authentication) {
-        ShortUrl shortUrl = shortUrlService.create(
-            memberId(authentication), request.originalUrl(), request.customAlias(), request.expiresAt());
+        Long memberId = AuthenticatedMember.memberIdOrNull(authentication);
+        ShortUrl shortUrl = shortUrlService.create(memberId, request.originalUrl(), request.customAlias(), request.expiresAt());
         return ApiResponse.success(ShortUrlResponse.from(ShortUrlWithClickCount.of(shortUrl, 0L), baseUrl));
     }
 
@@ -45,17 +48,22 @@ class ShortUrlController {
         return ApiResponse.success(page.map(view -> ShortUrlResponse.from(view, baseUrl)));
     }
 
-    @GetMapping("/api/v1/urls/{id}")
-    ApiResponse<ShortUrlResponse> find(@PathVariable Long id) {
-        ShortUrlWithClickCount view = shortUrlService.find(id);
-        return ApiResponse.success(ShortUrlResponse.from(view, baseUrl));
+    @GetMapping("/api/v1/urls/me")
+    ApiResponse<Page<ShortUrlResponse>> findMine(@ModelAttribute PageParam pageParam, Authentication authentication) {
+        AuthenticatedMember authenticatedMember = AuthenticatedMember.from(authentication);
+        if (authenticatedMember == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        Page<ShortUrlWithClickCount> page = shortUrlService.findAllByMember(authenticatedMember.memberId(), pageParam);
+        return ApiResponse.success(page.map(view -> ShortUrlResponse.from(view, baseUrl)));
     }
 
-    private Long memberId(Authentication authentication) {
-        if (authentication != null && authentication.getPrincipal() instanceof AuthenticatedMember authenticatedMember) {
-            return authenticatedMember.memberId();
-        }
-        return null;
+    @GetMapping("/api/v1/urls/{id}")
+    ApiResponse<ShortUrlResponse> find(@PathVariable Long id, Authentication authentication) {
+        Long requesterMemberId = AuthenticatedMember.memberIdOrNull(authentication);
+        Role requesterRole = AuthenticatedMember.roleOrNull(authentication);
+        ShortUrlWithClickCount view = shortUrlService.find(id, requesterMemberId, requesterRole);
+        return ApiResponse.success(ShortUrlResponse.from(view, baseUrl));
     }
 
 }

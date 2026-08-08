@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.domain.application;
 
+import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.page.Page;
@@ -30,8 +31,12 @@ public class ShortUrlService {
         return shortUrlFinder.findAll(pageParam);
     }
 
-    public ShortUrlWithClickCount find(Long id) {
-        return shortUrlFinder.get(id);
+    public Page<ShortUrlWithClickCount> findAllByMember(Long memberId, PageParam pageParam) {
+        return shortUrlFinder.findAllByMember(memberId, pageParam);
+    }
+
+    public ShortUrlWithClickCount find(Long id, Long requesterMemberId, Role requesterRole) {
+        return shortUrlFinder.get(id, requesterMemberId, requesterRole);
     }
 
     public String redirect(String shortKey, String ipAddress, String userAgent, String referer) {

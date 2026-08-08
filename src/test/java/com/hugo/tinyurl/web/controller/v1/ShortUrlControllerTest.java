@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.JsonFieldType.STRING;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -68,7 +69,11 @@ class ShortUrlControllerTest {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.data.shortKey").value("abc12345"))
             .andDo(document("short-url-create",
-                requestFields(fieldWithPath("originalUrl").description("단축할 원본 URL")),
+                requestFields(
+                    fieldWithPath("originalUrl").description("단축할 원본 URL"),
+                    fieldWithPath("customAlias").description("회원 전용 - 직접 지정할 단축 키(1~8자 영숫자)").type(STRING).optional(),
+                    fieldWithPath("expiresAt").description("회원 전용 - 만료 일시(현재로부터 최대 1개월)").type(STRING).optional()
+                ),
                 responseFields(
                     fieldWithPath("code").description("응답 코드"),
                     fieldWithPath("data.id").description("단축 URL id"),
@@ -86,10 +91,7 @@ class ShortUrlControllerTest {
     void createsShortUrlForMemberWithCustomAliasAndExpiresAt() throws Exception {
         ShortUrl shortUrl = newMemberShortUrl(1L, "myalias1", "https://example.com", 10L);
         given(shortUrlService.create(eq(10L), eq("https://example.com"), eq("myalias1"), any())).willReturn(shortUrl);
-        Claims claims = mock(Claims.class);
-        given(tokenProvider.parse("member-access-token")).willReturn(claims);
-        given(tokenProvider.isAccessToken(claims)).willReturn(true);
-        given(tokenProvider.toAuthenticatedMember(claims)).willReturn(new AuthenticatedMember(10L, Role.MEMBER));
+        stubAuthenticatedMember("member-access-token", new AuthenticatedMember(10L, Role.MEMBER));
         String expiresAt = LocalDateTime.now().plusDays(5).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         mockMvc.perform(post("/api/v1/urls")
@@ -140,8 +142,10 @@ class ShortUrlControllerTest {
     void findsShortUrlList() throws Exception {
         ShortUrl shortUrl = newShortUrl(1L, "abc12345", "https://example.com");
         given(shortUrlService.findAll(any())).willReturn(Page.of(List.of(ShortUrlWithClickCount.of(shortUrl, 3L)), true));
+        stubAuthenticatedMember("admin-access-token", new AuthenticatedMember(99L, Role.ADMIN));
 
         mockMvc.perform(get("/api/v1/urls")
+                .header("Authorization", "Bearer admin-access-token")
                 .param("cursor", "10")
                 .param("size", "1"))
             .andExpect(status().isOk())
@@ -168,18 +172,75 @@ class ShortUrlControllerTest {
     }
 
     @Test
+    void rejectsShortUrlListFromAnonymous() throws Exception {
+        mockMvc.perform(get("/api/v1/urls"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void rejectsShortUrlListFromNonAdminMember() throws Exception {
+        stubAuthenticatedMember("member-access-token", new AuthenticatedMember(10L, Role.MEMBER));
+
+        mockMvc.perform(get("/api/v1/urls").header("Authorization", "Bearer member-access-token"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
     void rejectsOutOfRangeSize() throws Exception {
-        mockMvc.perform(get("/api/v1/urls").param("size", "0"))
+        stubAuthenticatedMember("admin-access-token", new AuthenticatedMember(99L, Role.ADMIN));
+
+        mockMvc.perform(get("/api/v1/urls").header("Authorization", "Bearer admin-access-token").param("size", "0"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
     }
 
     @Test
-    void findsShortUrlById() throws Exception {
-        ShortUrl shortUrl = newShortUrl(1L, "abc12345", "https://example.com");
-        given(shortUrlService.find(1L)).willReturn(ShortUrlWithClickCount.of(shortUrl, 3L));
+    void findsOwnShortUrls() throws Exception {
+        ShortUrl shortUrl = newMemberShortUrl(1L, "abc12345", "https://example.com", 10L);
+        given(shortUrlService.findAllByMember(eq(10L), any())).willReturn(Page.of(List.of(ShortUrlWithClickCount.of(shortUrl, 1L)), false));
+        stubAuthenticatedMember("member-access-token", new AuthenticatedMember(10L, Role.MEMBER));
 
-        mockMvc.perform(get("/api/v1/urls/{id}", 1L))
+        mockMvc.perform(get("/api/v1/urls/me")
+                .header("Authorization", "Bearer member-access-token")
+                .param("cursor", "10")
+                .param("size", "1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].shortKey").value("abc12345"))
+            .andDo(document("short-url-list-mine",
+                queryParameters(
+                    parameterWithName("cursor").description("이전 페이지 마지막 항목의 id(생략 시 최신부터 조회)").optional(),
+                    parameterWithName("size").description("페이지 크기(1~100, 기본값 20)").optional()
+                ),
+                responseFields(
+                    fieldWithPath("code").description("응답 코드"),
+                    fieldWithPath("data.content[].id").description("단축 URL id"),
+                    fieldWithPath("data.content[].shortKey").description("단축 키"),
+                    fieldWithPath("data.content[].shortUrl").description("단축 URL 전체 주소"),
+                    fieldWithPath("data.content[].originalUrl").description("원본 URL"),
+                    fieldWithPath("data.content[].clickCount").description("누적 클릭 수"),
+                    fieldWithPath("data.content[].expiresAt").description("만료 일시"),
+                    fieldWithPath("data.content[].createdAt").description("생성 일시"),
+                    fieldWithPath("data.hasNext").description("다음 페이지 존재 여부"),
+                    fieldWithPath("message").description("에러 메시지(성공 시 null)")
+                )));
+    }
+
+    @Test
+    void rejectsFindOwnShortUrlsFromAnonymous() throws Exception {
+        mockMvc.perform(get("/api/v1/urls/me"))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void findsShortUrlByIdAsAdmin() throws Exception {
+        ShortUrl shortUrl = newShortUrl(1L, "abc12345", "https://example.com");
+        given(shortUrlService.find(eq(1L), eq(99L), eq(Role.ADMIN))).willReturn(ShortUrlWithClickCount.of(shortUrl, 3L));
+        stubAuthenticatedMember("admin-access-token", new AuthenticatedMember(99L, Role.ADMIN));
+
+        mockMvc.perform(get("/api/v1/urls/{id}", 1L).header("Authorization", "Bearer admin-access-token"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.shortKey").value("abc12345"))
             .andExpect(jsonPath("$.data.clickCount").value(3))
@@ -198,13 +259,41 @@ class ShortUrlControllerTest {
     }
 
     @Test
+    void findsOwnShortUrlById() throws Exception {
+        ShortUrl shortUrl = newMemberShortUrl(1L, "abc12345", "https://example.com", 10L);
+        given(shortUrlService.find(eq(1L), eq(10L), eq(Role.MEMBER))).willReturn(ShortUrlWithClickCount.of(shortUrl, 3L));
+        stubAuthenticatedMember("member-access-token", new AuthenticatedMember(10L, Role.MEMBER));
+
+        mockMvc.perform(get("/api/v1/urls/{id}", 1L).header("Authorization", "Bearer member-access-token"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.shortKey").value("abc12345"));
+    }
+
+    @Test
+    void rejectsFindShortUrlByIdFromNonOwner() throws Exception {
+        given(shortUrlService.find(eq(1L), eq(20L), eq(Role.MEMBER))).willThrow(new BusinessException(ErrorCode.FORBIDDEN));
+        stubAuthenticatedMember("member-access-token", new AuthenticatedMember(20L, Role.MEMBER));
+
+        mockMvc.perform(get("/api/v1/urls/{id}", 1L).header("Authorization", "Bearer member-access-token"))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
     void returnsNotFoundForUnknownId() throws Exception {
-        given(shortUrlService.find(eq(999L))).willThrow(new BusinessException(ErrorCode.NOT_FOUND));
+        given(shortUrlService.find(eq(999L), isNull(), isNull())).willThrow(new BusinessException(ErrorCode.NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/urls/{id}", 999L))
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$.code").value("NOT_FOUND"))
             .andDo(document("short-url-find-not-found"));
+    }
+
+    private void stubAuthenticatedMember(String token, AuthenticatedMember authenticatedMember) {
+        Claims claims = mock(Claims.class);
+        given(tokenProvider.parse(token)).willReturn(claims);
+        given(tokenProvider.isAccessToken(claims)).willReturn(true);
+        given(tokenProvider.toAuthenticatedMember(claims)).willReturn(authenticatedMember);
     }
 
     private ShortUrl newShortUrl(Long id, String shortKey, String originalUrl) {
