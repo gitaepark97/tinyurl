@@ -1,9 +1,12 @@
-package com.hugo.tinyurl.infra.zookeeper;
+package com.hugo.tinyurl.infra.coordination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.domain.port.IdGenerator;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,14 +15,19 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @Import(TestcontainersConfiguration.class)
-class ZookeeperConfigTest {
+class SnowflakeIdGeneratorIntegrationTest {
 
     @Autowired
-    Long workerId;
+    IdGenerator idGenerator;
 
     @Test
-    void workerIdIsAssignedWithinValidRange() {
-        assertThat(workerId).isBetween(0L, 1023L);
+    void generatesDistinctIdsViaZooKeeperAssignedWorkerId() {
+        Set<Long> ids = new HashSet<>();
+        for (int i = 0; i < 100; i++) {
+            ids.add(idGenerator.generate());
+        }
+
+        assertThat(ids).hasSize(100);
     }
 
 }

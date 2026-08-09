@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.infra.zookeeper;
+package com.hugo.tinyurl.infra.coordination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
