@@ -1,6 +1,17 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 app:
   click-event:
     async:
       core-pool-size: 4
       max-pool-size: 8
       queue-capacity: 500
+    kafka:
+      topic: click-events
+      consumer-group: click-event-consumer
+      partitions: 3
+      concurrency: 3
