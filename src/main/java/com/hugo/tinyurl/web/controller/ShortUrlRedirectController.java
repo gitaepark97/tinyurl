@@ -18,7 +18,8 @@ class ShortUrlRedirectController {
 
     private final ShortUrlService shortUrlService;
 
-    @GetMapping("/{shortKey:[0-9A-Za-z]{8}}")
+    // customAlias(1~8자)까지 매칭하도록 범위를 넓혔다 — 채번된 shortKey는 항상 8자라 그대로 포함된다.
+    @GetMapping("/{shortKey:[0-9A-Za-z]{1,8}}")
     ResponseEntity<Void> redirect(
         @PathVariable String shortKey,
         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent,

@@ -98,7 +98,7 @@ class ShortUrlServiceTest {
     void throwsNotFoundForExpiredKeyWithoutRecordingClick() {
         LocalDateTime now = LocalDateTime.now();
         shortUrl = shortUrlRepository.save(
-            new ShortUrl(idGenerator.generate(), shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
+            new ShortUrl(idGenerator.generate(), shortKeyGenerator.generate(), "https://example.com", null, now.minusDays(1), now));
 
         assertThatThrownBy(() -> shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", "test-agent", null))
             .isInstanceOf(BusinessException.class)

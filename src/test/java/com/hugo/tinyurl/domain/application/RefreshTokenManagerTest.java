@@ -1,0 +1,87 @@
+package com.hugo.tinyurl.domain.application;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.hugo.tinyurl.TestcontainersConfiguration;
+import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.domain.port.RefreshTokenRepository;
+import com.hugo.tinyurl.support.exception.BusinessException;
+import com.hugo.tinyurl.support.exception.ErrorCode;
+import java.time.Duration;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
+
+@SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
+@Import(TestcontainersConfiguration.class)
+class RefreshTokenManagerTest {
+
+    private static final Long MEMBER_ID = 1L;
+
+    @Autowired
+    RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    RefreshTokenManager refreshTokenManager;
+
+    @AfterEach
+    void cleanUp() {
+        refreshTokenRepository.deleteByMemberId(MEMBER_ID);
+    }
+
+    @Test
+    void rotatesTokenIssuedForMember() {
+        refreshTokenManager.issue(MEMBER_ID, "token-a", Duration.ofDays(1));
+
+        refreshTokenManager.rotate(MEMBER_ID, "token-a", "token-b", Duration.ofDays(1));
+
+        assertThat(refreshTokenRepository.findByMemberId(MEMBER_ID)).contains("token-b");
+    }
+
+    @Test
+    void rejectsRotateWithMismatchedToken() {
+        refreshTokenManager.issue(MEMBER_ID, "token-a", Duration.ofDays(1));
+
+        assertThatThrownBy(() -> refreshTokenManager.rotate(MEMBER_ID, "token-b", "token-c", Duration.ofDays(1)))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.UNAUTHORIZED);
+        assertThat(refreshTokenRepository.findByMemberId(MEMBER_ID)).contains("token-a");
+    }
+
+    @Test
+    void rejectsRotateWhenNoTokenIssued() {
+        assertThatThrownBy(() -> refreshTokenManager.rotate(MEMBER_ID, "token-a", "token-b", Duration.ofDays(1)))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.UNAUTHORIZED);
+    }
+
+    @Test
+    void revokedTokenCanNoLongerBeRotated() {
+        refreshTokenManager.issue(MEMBER_ID, "token-a", Duration.ofDays(1));
+
+        refreshTokenManager.revoke(MEMBER_ID);
+
+        assertThatThrownBy(() -> refreshTokenManager.rotate(MEMBER_ID, "token-a", "token-b", Duration.ofDays(1)))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.UNAUTHORIZED);
+    }
+
+    @Test
+    void issuingNewTokenReplacesPreviousOne() {
+        refreshTokenManager.issue(MEMBER_ID, "token-a", Duration.ofDays(1));
+
+        refreshTokenManager.issue(MEMBER_ID, "token-b", Duration.ofDays(1));
+
+        assertThat(refreshTokenRepository.findByMemberId(MEMBER_ID)).contains("token-b");
+        assertThatThrownBy(() -> refreshTokenManager.rotate(MEMBER_ID, "token-a", "token-c", Duration.ofDays(1)))
+            .isInstanceOf(BusinessException.class);
+    }
+
+}

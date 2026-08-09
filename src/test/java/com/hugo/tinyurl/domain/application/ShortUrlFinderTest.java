@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
@@ -111,7 +112,7 @@ class ShortUrlFinderTest {
     void findsByIdIncludingExpired() {
         ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, idGenerator, createdShortUrlIds);
 
-        ShortUrlWithClickCount found = shortUrlFinder.get(expired.id());
+        ShortUrlWithClickCount found = shortUrlFinder.get(expired.id(), null, Role.ADMIN);
 
         assertThat(found.shortUrl().id()).isEqualTo(expired.id());
         assertThat(found.shortUrl().isExpired(LocalDateTime.now())).isTrue();
@@ -120,7 +121,7 @@ class ShortUrlFinderTest {
 
     @Test
     void throwsNotFoundForUnknownIdOnGet() {
-        assertThatThrownBy(() -> shortUrlFinder.get(Long.MAX_VALUE))
+        assertThatThrownBy(() -> shortUrlFinder.get(Long.MAX_VALUE, null, Role.ADMIN))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
@@ -132,7 +133,7 @@ class ShortUrlFinderTest {
         clickCountRepository.increment(shortUrl.id());
         clickCountRepository.increment(shortUrl.id());
 
-        ShortUrlWithClickCount found = shortUrlFinder.get(shortUrl.id());
+        ShortUrlWithClickCount found = shortUrlFinder.get(shortUrl.id(), null, Role.ADMIN);
 
         assertThat(found.clickCount()).isEqualTo(2L);
         assertThat(shortUrlFinder.findAll(new PageParam(null, 20)).content())
@@ -140,6 +141,49 @@ class ShortUrlFinderTest {
             .singleElement()
             .extracting(ShortUrlWithClickCount::clickCount)
             .isEqualTo(2L);
+    }
+
+    @Test
+    void getAllowsOwnerToViewOwnUrl() {
+        ShortUrl shortUrl = shortUrlManager.create(1L, "https://example.com", null, null);
+        createdShortUrlIds.add(shortUrl.id());
+
+        ShortUrlWithClickCount found = shortUrlFinder.get(shortUrl.id(), 1L, Role.MEMBER);
+
+        assertThat(found.shortUrl().id()).isEqualTo(shortUrl.id());
+    }
+
+    @Test
+    void getRejectsNonOwnerNonAdminWithForbidden() {
+        ShortUrl shortUrl = shortUrlManager.create(1L, "https://example.com", null, null);
+        createdShortUrlIds.add(shortUrl.id());
+
+        assertThatThrownBy(() -> shortUrlFinder.get(shortUrl.id(), 2L, Role.MEMBER))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    void getRejectsAnonymousUrlForNonAdmin() {
+        ShortUrl shortUrl = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
+
+        assertThatThrownBy(() -> shortUrlFinder.get(shortUrl.id(), 1L, Role.MEMBER))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    void findAllByMemberReturnsOnlyOwnUrls() {
+        ShortUrl owned = shortUrlManager.create(1L, "https://example.com/mine", null, null);
+        createdShortUrlIds.add(owned.id());
+        ShortUrl others = shortUrlManager.create(2L, "https://example.com/others", null, null);
+        createdShortUrlIds.add(others.id());
+
+        Page<ShortUrlWithClickCount> page = shortUrlFinder.findAllByMember(1L, new PageParam(null, 20));
+
+        assertThat(page.content()).extracting(view -> view.shortUrl().id()).containsExactly(owned.id());
     }
 
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "click_event")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class ClickEventJpaEntity extends AppendOnlyJpaEntity<Long> {
 
     @Id
@@ -33,15 +35,6 @@ public class ClickEventJpaEntity extends AppendOnlyJpaEntity<Long> {
 
     @Column(name = "clicked_at", nullable = false, updatable = false)
     private LocalDateTime clickedAt;
-
-    public ClickEventJpaEntity(Long id, Long shortUrlId, String ipAddress, String userAgent, String referer, LocalDateTime clickedAt) {
-        this.id = id;
-        this.shortUrlId = shortUrlId;
-        this.ipAddress = ipAddress;
-        this.userAgent = userAgent;
-        this.referer = referer;
-        this.clickedAt = clickedAt;
-    }
 
     public static ClickEventJpaEntity from(ClickEvent clickEvent) {
         return new ClickEventJpaEntity(

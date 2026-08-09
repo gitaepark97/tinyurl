@@ -11,4 +11,6 @@ public interface ShortUrlEntityRepository extends JpaRepository<ShortUrlJpaEntit
 
     List<ShortUrlJpaEntity> findByIdLessThanOrderByIdDesc(Long id, Pageable pageable);
 
+    List<ShortUrlJpaEntity> findByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long id, Pageable pageable);
+
 }

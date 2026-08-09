@@ -6,17 +6,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.hugo.tinyurl.web.security.TokenProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+// addFilters=false 없이는 SecurityConfig 없는 슬라이스에 Boot 기본 보안(CSRF 등)이 대신 적용된다.
 @WebMvcTest(controllers = GlobalExceptionHandlerTestController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @MockitoBean
+    TokenProvider tokenProvider;
 
     @Test
     void handlesBusinessException() throws Exception {

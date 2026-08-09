@@ -1,7 +1,12 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.ClickEvent;
+import com.hugo.tinyurl.domain.model.Role;
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.domain.port.ShortUrlRepository;
+import com.hugo.tinyurl.support.exception.BusinessException;
+import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import java.util.List;
@@ -14,9 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 class ClickEventFinder {
 
     private final ClickEventRepository clickEventRepository;
+    private final ShortUrlRepository shortUrlRepository;
 
     @Transactional(readOnly = true)
-    Page<ClickEvent> findAll(Long shortUrlId, PageParam pageParam) {
+    Page<ClickEvent> findAll(Long shortUrlId, Long requesterMemberId, Role requesterRole, PageParam pageParam) {
+        ShortUrl shortUrl = shortUrlRepository.findById(shortUrlId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        if (requesterRole != Role.ADMIN && !shortUrl.isOwnedBy(requesterMemberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
         List<ClickEvent> overFetched = clickEventRepository.findByShortUrlIdAndIdLessThanOrderByIdDesc(
             shortUrlId, pageParam.cursorOrInitial(), pageParam.size() + 1);
 

@@ -6,7 +6,63 @@
 :toclevels: 2
 :sectlinks:
 
+== 회원가입
+
+include::{snippets}/auth-signup/http-request.adoc[]
+include::{snippets}/auth-signup/request-fields.adoc[]
+include::{snippets}/auth-signup/http-response.adoc[]
+include::{snippets}/auth-signup/response-fields.adoc[]
+
+=== 실패: 이메일 중복
+
+include::{snippets}/auth-signup-conflict/http-request.adoc[]
+include::{snippets}/auth-signup-conflict/http-response.adoc[]
+
+== 로그인
+
+access token(1시간)과 refresh token(14일)을 함께 발급한다. refresh token은 서버(Redis)에도
+저장돼, 재발급(rotation)이나 로그아웃 시 즉시 무효화할 수 있다.
+
+include::{snippets}/auth-login/http-request.adoc[]
+include::{snippets}/auth-login/request-fields.adoc[]
+include::{snippets}/auth-login/http-response.adoc[]
+include::{snippets}/auth-login/response-fields.adoc[]
+
+=== 실패: 잘못된 이메일/비밀번호
+
+include::{snippets}/auth-login-unauthorized/http-request.adoc[]
+include::{snippets}/auth-login-unauthorized/http-response.adoc[]
+
+== 토큰 재발급
+
+refresh token으로 access/refresh token을 모두 새로 발급한다. 기존 refresh token은 즉시
+폐기되며(rotation), 이미 사용된 refresh token을 다시 제출하면 실패한다.
+
+include::{snippets}/auth-refresh/http-request.adoc[]
+include::{snippets}/auth-refresh/request-fields.adoc[]
+include::{snippets}/auth-refresh/http-response.adoc[]
+include::{snippets}/auth-refresh/response-fields.adoc[]
+
+=== 실패: 유효하지 않은 refresh token
+
+토큰 서명이 잘못됐거나, access token을 refresh token 대신 제출했거나, 저장된 값과 일치하지
+않으면(이미 재발급되어 폐기된 토큰 등) 모두 401을 반환한다.
+
+include::{snippets}/auth-refresh-invalid/http-request.adoc[]
+include::{snippets}/auth-refresh-invalid/http-response.adoc[]
+
+== 로그아웃
+
+저장된 refresh token을 삭제해 즉시 무효화한다. access token으로 인증해야 한다.
+
+include::{snippets}/auth-logout/http-request.adoc[]
+include::{snippets}/auth-logout/http-response.adoc[]
+
 == 단축 URL 생성
+
+로그인 없이도 생성할 수 있다. `customAlias`/`expiresAt`은 회원 전용이며, 비회원이 값을 채워
+보내면 403을 반환한다. `customAlias`는 리다이렉트 라우트와 같은 규칙(1~8자 영숫자)을 따르고,
+`expiresAt`은 현재로부터 최대 1개월까지 지정할 수 있다(비회원 및 지정하지 않은 회원은 7일 고정).
 
 include::{snippets}/short-url-create/http-request.adoc[]
 include::{snippets}/short-url-create/request-fields.adoc[]
@@ -19,20 +75,32 @@ include::{snippets}/short-url-create-invalid/http-request.adoc[]
 include::{snippets}/short-url-create-invalid/http-response.adoc[]
 include::{snippets}/short-url-create-invalid/response-fields.adoc[]
 
-== 단축 URL 목록 조회
+== 단축 URL 전체 목록 조회
 
-`id`(auto-increment) 내림차순으로 조회한다. 다음 페이지를 조회하려면 `cursor`에 응답
-`data.content`의 마지막 항목 `id`를 넘긴다. `cursor`를 생략하면 최신 항목부터 조회한다.
+관리자만 조회할 수 있다(비회원/일반 회원은 각각 401/403). `id`(auto-increment) 내림차순으로
+조회한다. 다음 페이지를 조회하려면 `cursor`에 응답 `data.content`의 마지막 항목 `id`를 넘긴다.
+`cursor`를 생략하면 최신 항목부터 조회한다.
 
 include::{snippets}/short-url-list/http-request.adoc[]
 include::{snippets}/short-url-list/query-parameters.adoc[]
 include::{snippets}/short-url-list/http-response.adoc[]
 include::{snippets}/short-url-list/response-fields.adoc[]
 
+== 본인 단축 URL 목록 조회
+
+로그인한 회원 본인이 생성한 단축 URL만 조회한다. 페이지네이션 방식은 전체 목록 조회와 동일하다.
+
+include::{snippets}/short-url-list-mine/http-request.adoc[]
+include::{snippets}/short-url-list-mine/query-parameters.adoc[]
+include::{snippets}/short-url-list-mine/http-response.adoc[]
+include::{snippets}/short-url-list-mine/response-fields.adoc[]
+
 == 단축 URL 단건 조회
 
 `shortKey`가 아니라 단축 URL의 내부 `id`로 조회한다(목록 조회 응답의 `id`를 그대로 사용). 만료된
-단축 URL도 조회 가능하다(리다이렉트만 막히고 조회는 계속 가능해야 하기 때문).
+단축 URL도 조회 가능하다(리다이렉트만 막히고 조회는 계속 가능해야 하기 때문). 회원이 생성한
+URL은 소유자 본인 또는 관리자만 조회할 수 있고(그 외 403), 비회원이 생성한(소유자가 없는) URL은
+관리자만 조회할 수 있다.
 
 include::{snippets}/short-url-find/http-request.adoc[]
 include::{snippets}/short-url-find/http-response.adoc[]
@@ -56,9 +124,9 @@ include::{snippets}/short-url-redirect-not-found/http-response.adoc[]
 == 클릭 이벤트 목록 조회
 
 `id`(단축 URL의 내부 id) 아래 중첩된 리소스로 조회한다. 페이지네이션 방식은 단축 URL 목록
-조회와 동일하다. 존재하지 않는 id로 조회해도 404가 아니라 빈 목록(200)을 반환한다 - 만료된
-단축 URL의 클릭 이력도 조회 가능해야 하므로, 리다이렉트처럼 존재/만료 여부를 엄격히 검사하지
-않는다.
+조회와 동일하다. 단건 조회와 같은 소유권 규칙을 따른다 - 회원 소유 URL은 소유자 본인 또는
+관리자만, 비회원 생성 URL은 관리자만 조회할 수 있다. 존재하지 않는 id로 조회하면 404를
+반환한다.
 
 include::{snippets}/click-event-list/http-request.adoc[]
 include::{snippets}/click-event-list/path-parameters.adoc[]

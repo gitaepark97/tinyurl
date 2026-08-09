@@ -12,7 +12,7 @@ final class ShortUrlTestSupport {
     }
 
     static ShortUrl create(ShortUrlManager shortUrlManager, String originalUrl, List<Long> createdShortUrlIds) {
-        ShortUrl shortUrl = shortUrlManager.create(originalUrl);
+        ShortUrl shortUrl = shortUrlManager.create(null, originalUrl, null, null);
         createdShortUrlIds.add(shortUrl.id());
         return shortUrl;
     }
@@ -23,7 +23,7 @@ final class ShortUrlTestSupport {
     ) {
         LocalDateTime now = LocalDateTime.now();
         ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl(idGenerator.generate(), shortKeyGenerator.generate(), "https://example.com", now.minusDays(1), now));
+            new ShortUrl(idGenerator.generate(), shortKeyGenerator.generate(), "https://example.com", null, now.minusDays(1), now));
         createdShortUrlIds.add(shortUrl.id());
         return shortUrl;
     }

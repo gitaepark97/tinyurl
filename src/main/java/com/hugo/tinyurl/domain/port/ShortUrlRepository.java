@@ -14,6 +14,8 @@ public interface ShortUrlRepository {
 
     List<ShortUrl> findByIdLessThanOrderByIdDesc(Long id, int limit);
 
+    List<ShortUrl> findByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long id, int limit);
+
     void deleteById(Long id);
 
     void deleteAllById(Iterable<Long> ids);

@@ -1,11 +1,14 @@
 package com.hugo.tinyurl.domain.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
+import com.hugo.tinyurl.support.exception.BusinessException;
+import com.hugo.tinyurl.support.exception.ErrorCode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +56,72 @@ class ShortUrlManagerTest {
         ShortUrl second = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
 
         assertThat(first.shortKey()).isNotEqualTo(second.shortKey());
+    }
+
+    @Test
+    void createsForMemberWithCustomAliasAndExpiresAt() {
+        String customAlias = "cust" + (System.nanoTime() % 10000);
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(10).withNano(0);
+
+        ShortUrl shortUrl = shortUrlManager.create(1L, "https://example.com", customAlias, expiresAt);
+        createdShortUrlIds.add(shortUrl.id());
+
+        assertThat(shortUrl.shortKey()).isEqualTo(customAlias);
+        assertThat(shortUrl.memberId()).isEqualTo(1L);
+        assertThat(shortUrl.expiresAt()).isEqualTo(expiresAt);
+        assertThat(shortUrl.isOwnedBy(1L)).isTrue();
+    }
+
+    @Test
+    void createsForMemberWithGeneratedKeyAndDefaultExpirationWhenNotSpecified() {
+        LocalDateTime beforeCreate = LocalDateTime.now();
+
+        ShortUrl shortUrl = shortUrlManager.create(1L, "https://example.com", null, null);
+        createdShortUrlIds.add(shortUrl.id());
+
+        LocalDateTime afterCreate = LocalDateTime.now();
+        assertThat(shortUrl.shortKey()).hasSize(8);
+        assertThat(shortUrl.expiresAt()).isBetween(beforeCreate.plusDays(7), afterCreate.plusDays(7));
+    }
+
+    @Test
+    void rejectsDuplicateCustomAliasWithConflict() {
+        String customAlias = "dup" + (System.nanoTime() % 10000);
+        ShortUrl first = shortUrlManager.create(1L, "https://example.com", customAlias, null);
+        createdShortUrlIds.add(first.id());
+
+        assertThatThrownBy(() -> shortUrlManager.create(2L, "https://example.com", customAlias, null))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.CONFLICT);
+    }
+
+    @Test
+    void rejectsExpiresAtBeyondOneMonth() {
+        LocalDateTime tooFar = LocalDateTime.now().plusDays(31);
+
+        assertThatThrownBy(() -> shortUrlManager.create(1L, "https://example.com", null, tooFar))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.INVALID_INPUT);
+    }
+
+    @Test
+    void rejectsCustomAliasWithoutMemberId() {
+        assertThatThrownBy(() -> shortUrlManager.create(null, "https://example.com", "custom01", null))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    void rejectsExpiresAtWithoutMemberId() {
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(3);
+
+        assertThatThrownBy(() -> shortUrlManager.create(null, "https://example.com", null, expiresAt))
+            .isInstanceOf(BusinessException.class)
+            .extracting(e -> ((BusinessException) e).errorCode())
+            .isEqualTo(ErrorCode.FORBIDDEN);
     }
 
 }
