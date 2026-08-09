@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.infra.zookeeper;
+package com.hugo.tinyurl.infra.coordination;
 
 import com.hugo.tinyurl.domain.port.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;
