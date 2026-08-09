@@ -133,3 +133,30 @@ include::{snippets}/click-event-list/path-parameters.adoc[]
 include::{snippets}/click-event-list/query-parameters.adoc[]
 include::{snippets}/click-event-list/http-response.adoc[]
 include::{snippets}/click-event-list/response-fields.adoc[]
+
+== 회원 role 변경
+
+관리자만 호출할 수 있다(비회원/일반 회원은 각각 401/403). 최초 관리자는 이 API로 만들 수
+없으므로(관리자 전용 API로 관리자를 만들면 순환 문제가 생기기 때문) DB에서 직접 만든다. 이
+API는 그 이후 다른 회원을 관리자로 승격하거나 관리자를 다시 일반 회원으로 강등할 때 쓴다.
+role이 바뀐 회원의 refresh token은 즉시 무효화되어, 예전 role이 담긴 토큰으로는 재발급받을 수
+없다(단, 이미 발급된 access token 자체는 만료 전까지 유효하다).
+
+include::{snippets}/admin-member-role-update/http-request.adoc[]
+include::{snippets}/admin-member-role-update/path-parameters.adoc[]
+include::{snippets}/admin-member-role-update/request-fields.adoc[]
+include::{snippets}/admin-member-role-update/http-response.adoc[]
+include::{snippets}/admin-member-role-update/response-fields.adoc[]
+
+=== 실패: 존재하지 않는 회원
+
+include::{snippets}/admin-member-role-update-not-found/http-request.adoc[]
+include::{snippets}/admin-member-role-update-not-found/http-response.adoc[]
+
+=== 실패: 마지막 관리자 강등
+
+유일하게 남은 관리자를 일반 회원으로 강등할 수 없다 - 아무도 관리자 전용 API를 호출할 수
+없는 상태(락아웃)가 되는 것을 막기 위함이다.
+
+include::{snippets}/admin-member-role-update-last-admin-conflict/http-request.adoc[]
+include::{snippets}/admin-member-role-update-last-admin-conflict/http-response.adoc[]
