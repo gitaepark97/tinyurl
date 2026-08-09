@@ -2,18 +2,19 @@ package com.hugo.tinyurl.domain.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
+import static org.awaitility.Awaitility.await;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.domain.model.ClickCount;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
-import com.hugo.tinyurl.domain.port.ClickEventPublisher;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @Import(TestcontainersConfiguration.class)
@@ -45,9 +45,6 @@ class ShortUrlServiceTest {
     @Autowired
     IdGenerator idGenerator;
 
-    @MockitoBean
-    ClickEventPublisher clickEventPublisher;
-
     ShortUrl shortUrl;
 
     @AfterEach
@@ -70,13 +67,23 @@ class ShortUrlServiceTest {
     }
 
     @Test
-    void redirectPublishesClickEventOnSuccess() {
+    void redirectRecordsClickEventOnSuccess() {
         shortUrl = shortUrlService.create("https://example.com");
 
         String originalUrl = shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
 
         assertThat(originalUrl).isEqualTo("https://example.com");
-        verify(clickEventPublisher).publish(shortUrl.id(), "127.0.0.1", "test-agent", "https://referer.example.com");
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+            assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.id())).singleElement().satisfies(event -> {
+                assertThat(event.ipAddress()).isEqualTo("127.0.0.1");
+                assertThat(event.userAgent()).isEqualTo("test-agent");
+                assertThat(event.referer()).isEqualTo("https://referer.example.com");
+            });
+            assertThat(clickCountRepository.findById(shortUrl.id()))
+                .get()
+                .extracting(ClickCount::count)
+                .isEqualTo(1L);
+        });
     }
 
     @Test

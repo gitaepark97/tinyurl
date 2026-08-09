@@ -45,15 +45,17 @@ class KafkaClickEventPublisherTest {
 
     @Test
     void publishesMessageKeyedByShortUrlId() {
+        long shortUrlId = System.nanoTime();
         consumer = newConsumer();
         consumer.subscribe(List.of(topic));
 
-        clickEventPublisher.publish(1L, "127.0.0.1", "test-agent", "https://referer.example.com");
+        clickEventPublisher.publish(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com");
 
-        ConsumerRecord<String, String> record = pollSingleRecord();
-        assertThat(record.key()).isEqualTo("1");
+        // 같은 토픽을 다른 테스트도 공유하므로(Testcontainers Kafka가 전체 테스트 실행 동안 하나만 뜬다),
+        // earliest부터 읽되 이번에 발행한 shortUrlId를 key로 가진 레코드가 나올 때까지 걸러낸다.
+        ConsumerRecord<String, String> record = pollUntilKeyMatches(String.valueOf(shortUrlId));
         assertThat(record.value())
-            .contains("\"shortUrlId\":1")
+            .contains("\"shortUrlId\":" + shortUrlId)
             .contains("\"ipAddress\":\"127.0.0.1\"")
             .contains("\"userAgent\":\"test-agent\"")
             .contains("\"referer\":\"https://referer.example.com\"");
@@ -69,15 +71,16 @@ class KafkaClickEventPublisherTest {
         return new KafkaConsumer<>(props);
     }
 
-    private ConsumerRecord<String, String> pollSingleRecord() {
+    private ConsumerRecord<String, String> pollUntilKeyMatches(String expectedKey) {
         long deadline = System.nanoTime() + Duration.ofSeconds(10).toNanos();
         while (System.nanoTime() < deadline) {
-            var records = consumer.poll(Duration.ofMillis(200));
-            if (!records.isEmpty()) {
-                return records.iterator().next();
+            for (ConsumerRecord<String, String> record : consumer.poll(Duration.ofMillis(200))) {
+                if (expectedKey.equals(record.key())) {
+                    return record;
+                }
             }
         }
-        throw new AssertionError("토픽에서 메시지를 받지 못했습니다 - topic=" + topic);
+        throw new AssertionError("토픽에서 key=" + expectedKey + "인 메시지를 받지 못했습니다 - topic=" + topic);
     }
 
 }
