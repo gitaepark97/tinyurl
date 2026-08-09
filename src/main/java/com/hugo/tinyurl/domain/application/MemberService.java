@@ -1,6 +1,7 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.Member;
+import com.hugo.tinyurl.domain.model.Role;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ public class MemberService {
 
     private final MemberRegistrar memberRegistrar;
     private final MemberAuthenticator memberAuthenticator;
+    private final MemberRoleUpdater memberRoleUpdater;
     private final RefreshTokenManager refreshTokenManager;
 
     public Member register(String email, String rawPassword) {
@@ -23,6 +25,10 @@ public class MemberService {
 
     public Member findById(Long id) {
         return memberAuthenticator.findById(id);
+    }
+
+    public Member updateRole(Long id, Role role) {
+        return memberRoleUpdater.updateRole(id, role);
     }
 
     public void issueRefreshToken(Long memberId, String refreshToken, Duration ttl) {

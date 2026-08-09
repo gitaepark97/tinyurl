@@ -1,6 +1,7 @@
 package com.hugo.tinyurl.infra.persistence;
 
 import com.hugo.tinyurl.domain.model.Member;
+import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.port.MemberRepository;
 import com.hugo.tinyurl.infra.persistence.jpa.MemberEntityRepository;
 import com.hugo.tinyurl.infra.persistence.jpa.MemberJpaEntity;
@@ -28,6 +29,16 @@ class JpaMemberRepository implements MemberRepository {
     @Override
     public Optional<Member> findByEmail(String email) {
         return memberEntityRepository.findByEmail(email).map(MemberJpaEntity::toDomain);
+    }
+
+    @Override
+    public void updateRole(Long id, Role role) {
+        memberEntityRepository.updateRole(id, role);
+    }
+
+    @Override
+    public long countByRole(Role role) {
+        return memberEntityRepository.countByRole(role);
     }
 
     @Override
