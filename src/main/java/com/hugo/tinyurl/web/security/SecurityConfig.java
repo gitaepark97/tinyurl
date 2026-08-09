@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/logout").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/urls").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/v1/urls/me").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/admin/members/*/role").hasRole("ADMIN")
                 .anyRequest().permitAll())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

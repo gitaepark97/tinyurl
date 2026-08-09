@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -38,6 +39,12 @@ class GlobalExceptionHandler {
             .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (a, b) -> a));
         return ResponseEntity.status(ErrorCode.INVALID_INPUT.status())
             .body(ApiResponse.error(ErrorCode.INVALID_INPUT.code(), errors, ErrorCode.INVALID_INPUT.message()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity.status(ErrorCode.INVALID_INPUT.status())
+            .body(ApiResponse.error(ErrorCode.INVALID_INPUT.code(), ErrorCode.INVALID_INPUT.message()));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
