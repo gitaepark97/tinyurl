@@ -22,6 +22,11 @@ class JpaClickEventRepository implements ClickEventRepository {
     }
 
     @Override
+    public boolean existsByDeliveryKey(String deliveryKey) {
+        return clickEventEntityRepository.existsByDeliveryKey(deliveryKey);
+    }
+
+    @Override
     public List<ClickEvent> findByShortUrlIdAndIdLessThanOrderByIdDesc(Long shortUrlId, Long id, int limit) {
         return clickEventEntityRepository.findByShortUrlIdAndIdLessThanOrderByIdDesc(shortUrlId, id, PageRequest.of(0, limit)).stream()
             .map(ClickEventJpaEntity::toDomain)

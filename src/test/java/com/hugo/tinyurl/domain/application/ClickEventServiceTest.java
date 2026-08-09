@@ -60,7 +60,7 @@ class ClickEventServiceTest {
 
     private ClickEvent createClickEvent(Long shortUrlId, String ipAddress, String userAgent, String referer) {
         return clickEventRepository.save(
-            new ClickEvent(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, LocalDateTime.now()));
+            new ClickEvent(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, null, LocalDateTime.now()));
     }
 
     @Test

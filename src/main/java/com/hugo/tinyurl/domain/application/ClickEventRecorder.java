@@ -28,7 +28,7 @@ class ClickEventRecorder {
         maxRetries = 2, delay = 200, multiplier = 2
     )
     void record(Long shortUrlId, String ipAddress, String userAgent, String referer) {
-        ClickEvent clickEvent = ClickEvent.create(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, clockProvider.now());
+        ClickEvent clickEvent = ClickEvent.create(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, null, clockProvider.now());
         clickEventRepository.save(clickEvent);
         clickCountRepository.increment(shortUrlId);
     }
