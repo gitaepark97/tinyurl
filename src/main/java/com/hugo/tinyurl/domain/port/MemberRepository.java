@@ -1,6 +1,7 @@
 package com.hugo.tinyurl.domain.port;
 
 import com.hugo.tinyurl.domain.model.Member;
+import com.hugo.tinyurl.domain.model.Role;
 import java.util.Optional;
 
 public interface MemberRepository {
@@ -10,6 +11,10 @@ public interface MemberRepository {
     Optional<Member> findById(Long id);
 
     Optional<Member> findByEmail(String email);
+
+    void updateRole(Long id, Role role);
+
+    long countByRole(Role role);
 
     void deleteById(Long id);
 
