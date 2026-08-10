@@ -10,6 +10,7 @@
   - `short_url` 외에 리다이렉트 클릭 이벤트/집계용 `click_event`/`click_count` 테이블을 관리한다.
 - Apache ZooKeeper(Curator) — short key 발급용 전역 유일 카운터
 - Redis — 단축 URL 조회 캐시
+- Apache Kafka — 클릭 이벤트 비동기 기록(발행/구독)
 - Log4j2 (로깅), OpenTelemetry (Trace/Metric/Log 연동)
 - Spring REST Docs + Asciidoctor
 - Docker Compose (로컬 개발 인프라), Testcontainers (테스트)
@@ -34,7 +35,7 @@ docker compose down
 | profile | 용도 | DB / observability 설정 |
 | --- | --- | --- |
 | `local` | 로컬 개발 (기본값) | Docker Compose 자동 연결 |
-| `dev` | 개발 서버 | 환경변수(`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `OTLP_TRACING_ENDPOINT`, `OTLP_METRICS_ENDPOINT`, `OTLP_LOGGING_ENDPOINT`), 없으면 로컬 compose 스택 기준 기본값 사용 |
+| `dev` | 개발 서버 | 환경변수(`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `KAFKA_BOOTSTRAP_SERVERS`, `OTLP_TRACING_ENDPOINT`, `OTLP_METRICS_ENDPOINT`, `OTLP_LOGGING_ENDPOINT`), 없으면 로컬 compose 스택 기준 기본값 사용 |
 | `prod` | 운영 | 위 환경변수 전부 필수(기본값 없음) |
 
 ```bash

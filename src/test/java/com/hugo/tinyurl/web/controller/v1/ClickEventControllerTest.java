@@ -129,7 +129,7 @@ class ClickEventControllerTest {
     }
 
     private ClickEvent newClickEvent(Long id, String ipAddress, String userAgent, String referer) {
-        return new ClickEvent(id, 1L, ipAddress, userAgent, referer, LocalDateTime.now());
+        return new ClickEvent(id, 1L, ipAddress, userAgent, referer, null, LocalDateTime.now());
     }
 
 }

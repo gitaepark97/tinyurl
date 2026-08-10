@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ClickEventEntityRepository extends JpaRepository<ClickEventJpaEntity, Long> {
 
+    boolean existsByDeliveryKey(String deliveryKey);
+
     List<ClickEventJpaEntity> findByShortUrlIdAndIdLessThanOrderByIdDesc(Long shortUrlId, Long id, Pageable pageable);
 
 }

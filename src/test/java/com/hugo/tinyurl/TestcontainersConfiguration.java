@@ -6,6 +6,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.mysql.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -35,6 +36,13 @@ public class TestcontainersConfiguration {
             "app.zookeeper.connect-string",
             () -> zookeeperContainer.getHost() + ":" + zookeeperContainer.getMappedPort(2181)
         );
+    }
+
+    @Bean
+    @ServiceConnection
+    KafkaContainer kafkaContainer() {
+        // apache/kafka:3.9.0은 advertised.listeners 검증 실패로 기동이 안 돼 3.7.0을 쓴다.
+        return new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
     }
 
 }

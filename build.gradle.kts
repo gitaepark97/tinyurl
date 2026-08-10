@@ -45,6 +45,9 @@ dependencies {
     // 분산 유일 카운터(ZooKeeper)
     implementation("org.apache.curator:curator-recipes:5.9.0")
 
+    // 클릭 이벤트 비동기 발행/구독(Kafka)
+    implementation("org.springframework.boot:spring-boot-starter-kafka")
+
     // 인증/인가(필터 체인) — spring-security-crypto(비밀번호 해시)도 여기 포함돼 있어
     // 별도로 선언하지 않는다
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -86,6 +89,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-mysql")
     testImplementation("com.redis:testcontainers-redis:2.2.4")
+    testImplementation("org.testcontainers:testcontainers-kafka")
     testImplementation("org.awaitility:awaitility")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")

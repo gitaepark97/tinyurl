@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.domain.model.ClickCount;
 import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
+import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import com.hugo.tinyurl.domain.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
@@ -39,6 +41,9 @@ class ClickEventServiceTest {
     ClickEventRepository clickEventRepository;
 
     @Autowired
+    ClickCountRepository clickCountRepository;
+
+    @Autowired
     IdGenerator idGenerator;
 
     private final List<Long> createdShortUrlIds = new ArrayList<>();
@@ -60,7 +65,7 @@ class ClickEventServiceTest {
 
     private ClickEvent createClickEvent(Long shortUrlId, String ipAddress, String userAgent, String referer) {
         return clickEventRepository.save(
-            new ClickEvent(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, LocalDateTime.now()));
+            new ClickEvent(idGenerator.generate(), shortUrlId, ipAddress, userAgent, referer, null, LocalDateTime.now()));
     }
 
     @Test
@@ -155,6 +160,17 @@ class ClickEventServiceTest {
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.FORBIDDEN);
+    }
+
+    @Test
+    void recordDelegatesToRecorder() {
+        ShortUrl shortUrl = createShortUrl(LocalDateTime.now().plusDays(7));
+
+        clickEventService.record(shortUrl.id(), "127.0.0.1", "agent", null, "0-1");
+
+        assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.id())).singleElement();
+        assertThat(clickCountRepository.findById(shortUrl.id())).get().extracting(ClickCount::count).isEqualTo(1L);
+        clickCountRepository.deleteById(shortUrl.id());
     }
 
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -27,6 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 class ClickEventRecorderTest {
 
     private static final long SHORT_URL_ID = 1L;
+    private static final String DELIVERY_KEY = "0-1";
 
     @Autowired
     ClickEventRecorder clickEventRecorder;
@@ -49,7 +51,7 @@ class ClickEventRecorderTest {
             .willThrow(new TransientDataAccessResourceException("transient"))
             .willAnswer(invocation -> invocation.getArgument(0));
 
-        clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null);
+        clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null, DELIVERY_KEY);
 
         verify(clickEventRepository, times(3)).save(any());
         assertThat(clickCountRepository.findById(SHORT_URL_ID))
@@ -62,7 +64,7 @@ class ClickEventRecorderTest {
     void propagatesAfterMaxRetriesExhausted() {
         given(clickEventRepository.save(any())).willThrow(new TransientDataAccessResourceException("transient"));
 
-        assertThatThrownBy(() -> clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null))
+        assertThatThrownBy(() -> clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null, DELIVERY_KEY))
             .isInstanceOf(TransientDataAccessResourceException.class);
 
         verify(clickEventRepository, times(3)).save(any());
@@ -76,7 +78,7 @@ class ClickEventRecorderTest {
             .willThrow(new DataIntegrityViolationException("duplicate id"))
             .willAnswer(invocation -> invocation.getArgument(0));
 
-        clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null);
+        clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null, DELIVERY_KEY);
 
         verify(clickEventRepository, times(3)).save(any());
         assertThat(clickCountRepository.findById(SHORT_URL_ID))
@@ -89,10 +91,20 @@ class ClickEventRecorderTest {
     void propagatesAfterMaxRetriesExhaustedOnRepeatedIdCollision() {
         given(clickEventRepository.save(any())).willThrow(new DataIntegrityViolationException("duplicate id"));
 
-        assertThatThrownBy(() -> clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null))
+        assertThatThrownBy(() -> clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null, DELIVERY_KEY))
             .isInstanceOf(DataIntegrityViolationException.class);
 
         verify(clickEventRepository, times(3)).save(any());
+        assertThat(clickCountRepository.findById(SHORT_URL_ID)).isEmpty();
+    }
+
+    @Test
+    void skipsAlreadyRecordedDeliveryKey() {
+        given(clickEventRepository.existsByDeliveryKey(DELIVERY_KEY)).willReturn(true);
+
+        clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null, DELIVERY_KEY);
+
+        verify(clickEventRepository, never()).save(any());
         assertThat(clickCountRepository.findById(SHORT_URL_ID)).isEmpty();
     }
 

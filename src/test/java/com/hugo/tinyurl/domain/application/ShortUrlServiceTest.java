@@ -73,7 +73,7 @@ class ShortUrlServiceTest {
         String originalUrl = shortUrlService.redirect(shortUrl.shortKey(), "127.0.0.1", "test-agent", "https://referer.example.com");
 
         assertThat(originalUrl).isEqualTo("https://example.com");
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
             assertThat(ClickEventTestSupport.findAllByShortUrlId(clickEventRepository, shortUrl.id())).singleElement().satisfies(event -> {
                 assertThat(event.ipAddress()).isEqualTo("127.0.0.1");
                 assertThat(event.userAgent()).isEqualTo("test-agent");

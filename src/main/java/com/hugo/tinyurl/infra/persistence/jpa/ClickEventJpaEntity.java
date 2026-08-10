@@ -33,17 +33,20 @@ public class ClickEventJpaEntity extends AppendOnlyJpaEntity<Long> {
     @Column(name = "referer")
     private String referer;
 
+    @Column(name = "delivery_key")
+    private String deliveryKey;
+
     @Column(name = "clicked_at", nullable = false, updatable = false)
     private LocalDateTime clickedAt;
 
     public static ClickEventJpaEntity from(ClickEvent clickEvent) {
         return new ClickEventJpaEntity(
             clickEvent.id(), clickEvent.shortUrlId(), clickEvent.ipAddress(), clickEvent.userAgent(), clickEvent.referer(),
-            clickEvent.clickedAt());
+            clickEvent.deliveryKey(), clickEvent.clickedAt());
     }
 
     public ClickEvent toDomain() {
-        return new ClickEvent(id, shortUrlId, ipAddress, userAgent, referer, clickedAt);
+        return new ClickEvent(id, shortUrlId, ipAddress, userAgent, referer, deliveryKey, clickedAt);
     }
 
 }
