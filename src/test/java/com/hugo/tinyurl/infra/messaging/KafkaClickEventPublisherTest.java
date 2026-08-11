@@ -5,28 +5,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.port.ClickEventPublisher;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.tracing.Tracer;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.kafka.KafkaContainer;
 
+// SpringBootTest는 기본적으로 트레이싱 export(propagation 포함)를 꺼버리므로 다시 켜야 한다.
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
+@AutoConfigureTracing
 @Import(TestcontainersConfiguration.class)
 class KafkaClickEventPublisherTest {
 
     @Autowired
     ClickEventPublisher clickEventPublisher;
+
+    @Autowired
+    Tracer tracer;
+
+    @Autowired
+    ObservationRegistry observationRegistry;
 
     @Autowired
     KafkaContainer kafkaContainer;
@@ -59,6 +73,30 @@ class KafkaClickEventPublisherTest {
             .contains("\"ipAddress\":\"127.0.0.1\"")
             .contains("\"userAgent\":\"test-agent\"")
             .contains("\"referer\":\"https://referer.example.com\"");
+    }
+
+    @Test
+    void propagatesTraceContextIntoMessageHeaders() {
+        long shortUrlId = System.nanoTime();
+        consumer = newConsumer();
+        consumer.subscribe(List.of(topic));
+
+        // 부모-자식 링크는 현재 Observation 기준이라 Tracer.withSpan이 아닌 Observation을 직접 열어야 한다.
+        Observation observation = Observation.createNotStarted("test-publish", observationRegistry).start();
+        String traceId;
+        try (Observation.Scope ignored = observation.openScope()) {
+            traceId = tracer.currentSpan().context().traceId();
+            clickEventPublisher.publish(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com");
+        } finally {
+            observation.stop();
+        }
+
+        ConsumerRecord<String, String> record = pollUntilKeyMatches(String.valueOf(shortUrlId));
+        assertThat(record.headers()).anySatisfy(header -> assertThat(headerValue(header)).contains(traceId));
+    }
+
+    private String headerValue(Header header) {
+        return new String(header.value(), StandardCharsets.UTF_8);
     }
 
     private KafkaConsumer<String, String> newConsumer() {
