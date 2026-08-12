@@ -3,10 +3,12 @@ package com.hugo.tinyurl.domain.application;
 import com.hugo.tinyurl.domain.port.RefreshTokenRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import io.micrometer.observation.annotation.Observed;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@Observed
 @Component
 @RequiredArgsConstructor
 class RefreshTokenManager {

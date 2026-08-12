@@ -7,11 +7,13 @@ import com.hugo.tinyurl.domain.port.MemberRepository;
 import com.hugo.tinyurl.domain.port.PasswordEncoder;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
+@Observed
 @Slf4j
 @Component
 @RequiredArgsConstructor

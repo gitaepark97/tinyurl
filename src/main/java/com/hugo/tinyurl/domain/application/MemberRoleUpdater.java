@@ -5,9 +5,11 @@ import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.port.MemberRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+@Observed
 @Component
 @RequiredArgsConstructor
 class MemberRoleUpdater {
