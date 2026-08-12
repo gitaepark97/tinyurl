@@ -2,10 +2,12 @@ package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.Member;
 import com.hugo.tinyurl.domain.model.Role;
+import io.micrometer.observation.annotation.Observed;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@Observed
 @Service
 @RequiredArgsConstructor
 public class MemberService {

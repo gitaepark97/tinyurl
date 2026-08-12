@@ -3,6 +3,7 @@ package com.hugo.tinyurl.domain.application;
 import com.hugo.tinyurl.domain.port.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import org.sqids.Sqids;
 
 import java.util.List;
 
+@Observed
 @Slf4j
 @RequiredArgsConstructor
 @Component

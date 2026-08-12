@@ -1,10 +1,9 @@
-package com.hugo.tinyurl.infra.messaging;
+package com.hugo.tinyurl.domain.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.port.ClickEventPublisher;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
@@ -31,16 +30,16 @@ import org.testcontainers.kafka.KafkaContainer;
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @AutoConfigureTracing
 @Import(TestcontainersConfiguration.class)
-class KafkaClickEventPublisherTest {
-
-    @Autowired
-    ClickEventPublisher clickEventPublisher;
+class ClickEventManagerContextPropagationTest {
 
     @Autowired
     Tracer tracer;
 
     @Autowired
     ObservationRegistry observationRegistry;
+
+    @Autowired
+    ClickEventManager clickEventManager;
 
     @Autowired
     KafkaContainer kafkaContainer;
@@ -58,35 +57,18 @@ class KafkaClickEventPublisherTest {
     }
 
     @Test
-    void publishesMessageKeyedByShortUrlId() {
+    void propagatesTraceContextAcrossAsyncBoundaryIntoMessageHeaders() {
         long shortUrlId = System.nanoTime();
         consumer = newConsumer();
         consumer.subscribe(List.of(topic));
 
-        clickEventPublisher.publish(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com");
-
-        // 같은 토픽을 다른 테스트도 공유하므로(Testcontainers Kafka가 전체 테스트 실행 동안 하나만 뜬다),
-        // earliest부터 읽되 이번에 발행한 shortUrlId를 key로 가진 레코드가 나올 때까지 걸러낸다.
-        ConsumerRecord<String, String> record = pollUntilKeyMatches(String.valueOf(shortUrlId));
-        assertThat(record.value())
-            .contains("\"shortUrlId\":" + shortUrlId)
-            .contains("\"ipAddress\":\"127.0.0.1\"")
-            .contains("\"userAgent\":\"test-agent\"")
-            .contains("\"referer\":\"https://referer.example.com\"");
-    }
-
-    @Test
-    void propagatesTraceContextIntoMessageHeaders() {
-        long shortUrlId = System.nanoTime();
-        consumer = newConsumer();
-        consumer.subscribe(List.of(topic));
-
-        // 부모-자식 링크는 현재 Observation 기준이라 Tracer.withSpan이 아닌 Observation을 직접 열어야 한다.
-        Observation observation = Observation.createNotStarted("test-publish", observationRegistry).start();
+        // @Async 경계를 넘어 clickEventPublishExecutor 스레드까지 이 Observation이 전파돼야
+        // Kafka publish의 producer span이 자식으로 연결되고 traceId가 헤더에 실린다.
+        Observation observation = Observation.createNotStarted("test-record", observationRegistry).start();
         String traceId;
         try (Observation.Scope ignored = observation.openScope()) {
             traceId = tracer.currentSpan().context().traceId();
-            clickEventPublisher.publish(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com");
+            clickEventManager.record(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com");
         } finally {
             observation.stop();
         }
@@ -102,7 +84,7 @@ class KafkaClickEventPublisherTest {
     private KafkaConsumer<String, String> newConsumer() {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "click-event-publisher-test-" + System.nanoTime());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "click-event-manager-test-" + System.nanoTime());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

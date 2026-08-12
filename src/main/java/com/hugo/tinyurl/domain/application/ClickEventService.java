@@ -4,9 +4,11 @@ import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
+import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@Observed
 @Service
 @RequiredArgsConstructor
 public class ClickEventService {
