@@ -13,6 +13,7 @@ import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.model.ClickCount;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ class ClickEventRecorderTest {
 
     @Autowired
     ClickCountRepository clickCountRepository;
+
+    @Autowired
+    MeterRegistry meterRegistry;
 
     @AfterEach
     void cleanUp() {
@@ -101,11 +105,13 @@ class ClickEventRecorderTest {
     @Test
     void skipsAlreadyRecordedDeliveryKey() {
         given(clickEventRepository.existsByDeliveryKey(DELIVERY_KEY)).willReturn(true);
+        double before = meterRegistry.get("click_event.duplicate").counter().count();
 
         clickEventRecorder.record(SHORT_URL_ID, "127.0.0.1", "test-agent", null, DELIVERY_KEY);
 
         verify(clickEventRepository, never()).save(any());
         assertThat(clickCountRepository.findById(SHORT_URL_ID)).isEmpty();
+        assertThat(meterRegistry.get("click_event.duplicate").counter().count()).isEqualTo(before + 1);
     }
 
 }
