@@ -65,6 +65,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
     implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
     implementation("io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:2.28.0-alpha")
+    implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.2.1")
 
     // 코드 생성
     compileOnly("org.projectlombok:lombok")
