@@ -15,6 +15,7 @@ import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,9 @@ class ShortUrlFinderTest {
     @Autowired
     IdGenerator idGenerator;
 
+    @Autowired
+    MeterRegistry meterRegistry;
+
     private final List<Long> createdShortUrlIds = new ArrayList<>();
 
     @AfterEach
@@ -59,28 +63,39 @@ class ShortUrlFinderTest {
     @Test
     void findsShortUrlByValidShortKey() {
         ShortUrl shortUrl = ShortUrlTestSupport.create(shortUrlManager, "https://example.com", createdShortUrlIds);
+        double before = redirectCount("success");
 
         ShortUrl found = shortUrlFinder.find(shortUrl.shortKey());
 
         assertThat(found.id()).isEqualTo(shortUrl.id());
+        assertThat(redirectCount("success")).isEqualTo(before + 1);
     }
 
     @Test
     void throwsNotFoundForUnknownShortKey() {
+        double before = redirectCount("not_found");
+
         assertThatThrownBy(() -> shortUrlFinder.find("nope0000"))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
+        assertThat(redirectCount("not_found")).isEqualTo(before + 1);
     }
 
     @Test
     void throwsNotFoundForExpiredShortKey() {
         ShortUrl expired = ShortUrlTestSupport.createExpired(shortUrlRepository, shortKeyGenerator, idGenerator, createdShortUrlIds);
+        double before = redirectCount("expired");
 
         assertThatThrownBy(() -> shortUrlFinder.find(expired.shortKey()))
             .isInstanceOf(BusinessException.class)
             .extracting(e -> ((BusinessException) e).errorCode())
             .isEqualTo(ErrorCode.NOT_FOUND);
+        assertThat(redirectCount("expired")).isEqualTo(before + 1);
+    }
+
+    private double redirectCount(String result) {
+        return meterRegistry.get("short_url.redirect").tag("result", result).counter().count();
     }
 
     @Test

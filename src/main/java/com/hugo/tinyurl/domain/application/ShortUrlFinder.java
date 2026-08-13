@@ -12,34 +12,58 @@ import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.annotation.Observed;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Observed
 @Component
-@RequiredArgsConstructor
 class ShortUrlFinder {
 
     private final ShortUrlRepository shortUrlRepository;
     private final ClickCountRepository clickCountRepository;
     private final ClockProvider clockProvider;
     private final ShortUrlCacheRepository shortUrlCacheRepository;
+    private final Counter redirectSuccessCounter;
+    private final Counter redirectNotFoundCounter;
+    private final Counter redirectExpiredCounter;
+
+    ShortUrlFinder(
+        ShortUrlRepository shortUrlRepository,
+        ClickCountRepository clickCountRepository,
+        ClockProvider clockProvider,
+        ShortUrlCacheRepository shortUrlCacheRepository,
+        MeterRegistry meterRegistry
+    ) {
+        this.shortUrlRepository = shortUrlRepository;
+        this.clickCountRepository = clickCountRepository;
+        this.clockProvider = clockProvider;
+        this.shortUrlCacheRepository = shortUrlCacheRepository;
+        this.redirectSuccessCounter = Counter.builder("short_url.redirect").tag("result", "success").register(meterRegistry);
+        this.redirectNotFoundCounter = Counter.builder("short_url.redirect").tag("result", "not_found").register(meterRegistry);
+        this.redirectExpiredCounter = Counter.builder("short_url.redirect").tag("result", "expired").register(meterRegistry);
+    }
 
     @Transactional(readOnly = true)
     ShortUrl find(String shortKey) {
-        ShortUrl shortUrl = shortUrlCacheRepository.findByShortKey(shortKey, this::findValidByShortKey)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        ShortUrl shortUrl = shortUrlCacheRepository.findByShortKey(shortKey, this::findByShortKeyOrNull)
+            .orElseGet(() -> {
+                redirectNotFoundCounter.increment();
+                throw new BusinessException(ErrorCode.NOT_FOUND);
+            });
 
         if (shortUrl.isExpired(clockProvider.now())) {
             shortUrlCacheRepository.evict(shortKey);
+            redirectExpiredCounter.increment();
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
+        redirectSuccessCounter.increment();
         return shortUrl;
     }
 
@@ -71,10 +95,10 @@ class ShortUrlFinder {
         return ShortUrlWithClickCount.of(shortUrl, clickCount);
     }
 
-    private ShortUrl findValidByShortKey(String shortKey) {
-        return shortUrlRepository.findByShortKey(shortKey)
-            .filter(url -> !url.isExpired(clockProvider.now()))
-            .orElse(null);
+    // 만료 여부는 여기서 걸러내지 않는다 - find()가 not_found/expired를 캐시 신선도와 무관하게
+    // 일관되게 구분하려면, 이미 만료된 항목도 일단 반환해서 find()의 isExpired 체크를 항상 거치게 해야 한다.
+    private ShortUrl findByShortKeyOrNull(String shortKey) {
+        return shortUrlRepository.findByShortKey(shortKey).orElse(null);
     }
 
     private Page<ShortUrlWithClickCount> toPage(List<ShortUrl> overFetched, PageParam pageParam) {

@@ -25,6 +25,9 @@ services:
       - '3000:3000'
       - '4317:4317'
       - '4318:4318'
+    volumes:
+      - './grafana/dashboards/tinyurl-custom-metrics.json:/otel-lgtm/grafana-dashboard-tinyurl-custom-metrics.json'
+      - './grafana/provisioning/dashboards/tinyurl-custom-metrics.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/tinyurl-custom-metrics.yaml'
     deploy:
       resources:
         limits:

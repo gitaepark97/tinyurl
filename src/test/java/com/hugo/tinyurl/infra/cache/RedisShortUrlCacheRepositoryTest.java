@@ -6,6 +6,7 @@ import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ShortUrlCacheRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
@@ -21,6 +22,9 @@ class RedisShortUrlCacheRepositoryTest {
 
     @Autowired
     ShortUrlCacheRepository shortUrlCacheRepository;
+
+    @Autowired
+    MeterRegistry meterRegistry;
 
     @AfterEach
     void cleanUpCache() {
@@ -81,6 +85,24 @@ class RedisShortUrlCacheRepositoryTest {
         });
 
         assertThat(loadCount).hasValue(1);
+    }
+
+    @Test
+    void incrementsHitAndMissCounters() {
+        double hitBefore = cacheAccessCount("hit");
+        double missBefore = cacheAccessCount("miss");
+        LocalDateTime now = LocalDateTime.now();
+        ShortUrl shortUrl = new ShortUrl(3L, "abc12345", "https://example.com", null, now.plusDays(7), now);
+
+        shortUrlCacheRepository.findByShortKey("abc12345", key -> shortUrl);
+        shortUrlCacheRepository.findByShortKey("abc12345", key -> shortUrl);
+
+        assertThat(cacheAccessCount("miss")).isEqualTo(missBefore + 1);
+        assertThat(cacheAccessCount("hit")).isEqualTo(hitBefore + 1);
+    }
+
+    private double cacheAccessCount(String result) {
+        return meterRegistry.get("short_url.cache.access").tag("result", result).counter().count();
     }
 
 }

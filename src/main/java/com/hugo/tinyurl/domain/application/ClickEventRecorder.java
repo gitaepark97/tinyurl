@@ -5,8 +5,9 @@ import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import com.hugo.tinyurl.domain.port.ClockProvider;
 import com.hugo.tinyurl.domain.port.IdGenerator;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.annotation.Observed;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessException;
@@ -18,13 +19,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Observed
 @Slf4j
 @Component
-@RequiredArgsConstructor
 class ClickEventRecorder {
 
     private final ClickEventRepository clickEventRepository;
     private final ClickCountRepository clickCountRepository;
     private final ClockProvider clockProvider;
     private final IdGenerator idGenerator;
+    private final Counter duplicateCounter;
+
+    ClickEventRecorder(
+        ClickEventRepository clickEventRepository,
+        ClickCountRepository clickCountRepository,
+        ClockProvider clockProvider,
+        IdGenerator idGenerator,
+        MeterRegistry meterRegistry
+    ) {
+        this.clickEventRepository = clickEventRepository;
+        this.clickCountRepository = clickCountRepository;
+        this.clockProvider = clockProvider;
+        this.idGenerator = idGenerator;
+        this.duplicateCounter = Counter.builder("click_event.duplicate").register(meterRegistry);
+    }
 
     // deliveryKey 유니크 제약 충돌(진짜 동시 중복 처리)도 이 재시도 대상에 걸리는데, 상대 트랜잭션이
     // 재시도 3회 안에 커밋 못 하면 예외가 그대로 던져질 수 있다 - 그래도 KafkaClickEventListener가
@@ -36,6 +51,7 @@ class ClickEventRecorder {
     )
     void record(Long shortUrlId, String ipAddress, String userAgent, String referer, String deliveryKey) {
         if (clickEventRepository.existsByDeliveryKey(deliveryKey)) {
+            duplicateCounter.increment();
             log.info("중복 전달된 클릭 이벤트 스킵 - deliveryKey={}", deliveryKey);
             return;
         }
