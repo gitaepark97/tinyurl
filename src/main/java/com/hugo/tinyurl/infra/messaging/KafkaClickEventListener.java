@@ -1,7 +1,8 @@
 package com.hugo.tinyurl.infra.messaging;
 
 import com.hugo.tinyurl.domain.application.ClickEventService;
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -10,10 +11,15 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 class KafkaClickEventListener {
 
     private final ClickEventService clickEventService;
+    private final Counter consumeFailureCounter;
+
+    KafkaClickEventListener(ClickEventService clickEventService, MeterRegistry meterRegistry) {
+        this.clickEventService = clickEventService;
+        this.consumeFailureCounter = Counter.builder("click_event.consume.failure").register(meterRegistry);
+    }
 
     @KafkaListener(
         topics = "${app.click-event.kafka.topic}",
@@ -25,6 +31,7 @@ class KafkaClickEventListener {
         try {
             clickEventService.record(message.shortUrlId(), message.ipAddress(), message.userAgent(), message.referer(), deliveryKey);
         } catch (Exception e) {
+            consumeFailureCounter.increment();
             log.error("클릭 이벤트 기록 실패 - deliveryKey={}", deliveryKey, e);
         }
     }
