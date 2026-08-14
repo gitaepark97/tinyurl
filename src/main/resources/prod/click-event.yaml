@@ -8,6 +8,7 @@ spring:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
+      auto-offset-reset: earliest
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: com.hugo.tinyurl.infra.messaging
@@ -23,3 +24,7 @@ app:
       consumer-group: click-event-consumer
       partitions: 3
       concurrency: 3
+      retry:
+        initial-interval-ms: 1000
+        max-interval-ms: 10000
+        max-elapsed-ms: 30000
