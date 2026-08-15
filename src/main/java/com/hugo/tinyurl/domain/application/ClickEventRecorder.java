@@ -41,9 +41,7 @@ class ClickEventRecorder {
         this.duplicateCounter = Counter.builder("click_event.duplicate").register(meterRegistry);
     }
 
-    // deliveryKey 유니크 제약 충돌(진짜 동시 중복 처리)도 이 재시도 대상에 걸리는데, 상대 트랜잭션이
-    // 재시도 3회 안에 커밋 못 하면 예외가 그대로 던져질 수 있다 - 그래도 KafkaClickEventListener가
-    // 잡아서 로그만 남기므로 컨슈머가 멈추진 않는다(클릭 이벤트 하나 유실은 감수).
+    // deliveryKey 유니크 제약 충돌(동시 중복 처리)을 흡수하기 위한 짧은 재시도 - 그래도 실패하면 컨테이너 레벨 재시도/DLQ로 넘어간다.
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Retryable(
         includes = {TransientDataAccessException.class, DataIntegrityViolationException.class},

@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.infra.messaging;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.willThrow;
 
@@ -25,12 +25,12 @@ class KafkaClickEventListenerFailureTest {
     ClickEventService clickEventService;
 
     @Test
-    void swallowsRecordingFailureInsteadOfPropagating() {
+    void propagatesRecordingFailureSoContainerErrorHandlerCanRetry() {
         willThrow(new RuntimeException("recording failed")).given(clickEventService)
             .record(any(), any(), any(), any(), any());
 
-        assertThatCode(() -> kafkaClickEventListener.listen(new ClickEventMessage(1L, "127.0.0.1", "test-agent", null), 0, 0))
-            .doesNotThrowAnyException();
+        assertThatThrownBy(() -> kafkaClickEventListener.listen(new ClickEventMessage(1L, "127.0.0.1", "test-agent", null), 0, 0))
+            .isInstanceOf(RuntimeException.class);
     }
 
 }
