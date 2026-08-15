@@ -1,0 +1,6 @@
+app:
+  storage:
+    s3:
+      bucket: ${ARCHIVE_S3_BUCKET:tinyurl-expired-archive}
+      region: ${ARCHIVE_S3_REGION:ap-northeast-2}
+      endpoint: ${ARCHIVE_S3_ENDPOINT:}

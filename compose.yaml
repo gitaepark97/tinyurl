@@ -86,9 +86,28 @@ services:
           memory: 1G
         reservations:
           memory: 512M
+  localstack:
+    image: 'localstack/localstack:3.8'
+    container_name: 'tinyurl-localstack'
+    environment:
+      - 'SERVICES=s3'
+      - 'DEFAULT_REGION=ap-northeast-2'
+    ports:
+      - '4566:4566'
+    volumes:
+      - './docker/localstack/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh'
+      - 'localstack-data:/var/lib/localstack'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          memory: 256M
 
 volumes:
   mysql-data:
   zookeeper-data:
   zookeeper-datalog:
   kafka-data:
+  localstack-data:

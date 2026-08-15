@@ -67,6 +67,10 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:2.28.0-alpha")
     implementation("net.ttddyy.observation:datasource-micrometer-spring-boot:2.2.1")
 
+    // S3
+    implementation(platform("software.amazon.awssdk:bom:2.46.7"))
+    implementation("software.amazon.awssdk:s3")
+
     // 코드 생성
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -91,6 +95,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-mysql")
     testImplementation("com.redis:testcontainers-redis:2.2.4")
     testImplementation("org.testcontainers:testcontainers-kafka")
+    testImplementation("org.testcontainers:localstack:1.21.3")
     testImplementation("org.awaitility:awaitility")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
