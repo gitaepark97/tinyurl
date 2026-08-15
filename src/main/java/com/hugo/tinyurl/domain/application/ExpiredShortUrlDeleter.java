@@ -1,6 +1,5 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
@@ -18,8 +17,8 @@ class ExpiredShortUrlDeleter {
     private final ClickCountRepository clickCountRepository;
 
     @Transactional
-    void deleteAll(List<Long> shortUrlIds, List<ClickEvent> clickEvents) {
-        clickEventRepository.deleteAll(clickEvents);
+    void deleteAll(List<Long> shortUrlIds) {
+        clickEventRepository.deleteAllByShortUrlIdIn(shortUrlIds);
         clickCountRepository.deleteAllById(shortUrlIds);
         shortUrlRepository.deleteAllById(shortUrlIds);
     }

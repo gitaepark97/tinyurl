@@ -35,6 +35,16 @@ class ZookeeperConfig {
         return client;
     }
 
+    // 락 recipe(InterProcessMutex 등)는 CuratorFramework 생성 시점의 재시도 정책을 그대로 쓰므로,
+    // 연결/CAS용보다 여유 있는 LOCK_RETRY_POLICY를 쓰려면 별도 커넥션이 필요하다.
+    @Bean(destroyMethod = "close")
+    CuratorFramework lockCuratorFramework(@Value("${app.zookeeper.connect-string}") String connectString) {
+        CuratorFramework client = CuratorFrameworkFactory.newClient(connectString, LOCK_RETRY_POLICY);
+        client.start();
+        awaitConnection(client, connectString);
+        return client;
+    }
+
     @Bean
     DistributedAtomicLong shortKeyCounter(CuratorFramework curatorFramework) {
         PromotedToLock promotedToLock = PromotedToLock.builder()
