@@ -1,0 +1,5 @@
+app:
+  cleanup:
+    short-url:
+      chunk-size: 200
+      cron: "0 0 */6 * * *"

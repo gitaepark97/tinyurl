@@ -14,4 +14,6 @@ public interface ClickCountRepository {
 
     void deleteById(Long shortUrlId);
 
+    void deleteAllById(Iterable<Long> shortUrlIds);
+
 }

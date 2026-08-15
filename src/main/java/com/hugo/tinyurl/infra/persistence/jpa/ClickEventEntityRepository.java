@@ -10,4 +10,6 @@ public interface ClickEventEntityRepository extends JpaRepository<ClickEventJpaE
 
     List<ClickEventJpaEntity> findByShortUrlIdAndIdLessThanOrderByIdDesc(Long shortUrlId, Long id, Pageable pageable);
 
+    List<ClickEventJpaEntity> findByShortUrlIdIn(List<Long> shortUrlIds);
+
 }

@@ -4,6 +4,7 @@ import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.infra.persistence.jpa.ShortUrlEntityRepository;
 import com.hugo.tinyurl.infra.persistence.jpa.ShortUrlJpaEntity;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,13 @@ class JpaShortUrlRepository implements ShortUrlRepository {
     @Override
     public List<ShortUrl> findByMemberIdAndIdLessThanOrderByIdDesc(Long memberId, Long id, int limit) {
         return shortUrlEntityRepository.findByMemberIdAndIdLessThanOrderByIdDesc(memberId, id, PageRequest.of(0, limit)).stream()
+            .map(ShortUrlJpaEntity::toDomain)
+            .toList();
+    }
+
+    @Override
+    public List<ShortUrl> findByExpiresAtBeforeOrderByIdAsc(LocalDateTime dateTime, int limit) {
+        return shortUrlEntityRepository.findByExpiresAtBeforeOrderByIdAsc(dateTime, PageRequest.of(0, limit)).stream()
             .map(ShortUrlJpaEntity::toDomain)
             .toList();
     }

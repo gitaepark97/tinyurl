@@ -11,6 +11,8 @@ public interface ClickEventRepository {
 
     List<ClickEvent> findByShortUrlIdAndIdLessThanOrderByIdDesc(Long shortUrlId, Long id, int limit);
 
+    List<ClickEvent> findAllByShortUrlIdIn(List<Long> shortUrlIds);
+
     void deleteAll(Iterable<ClickEvent> clickEvents);
 
 }

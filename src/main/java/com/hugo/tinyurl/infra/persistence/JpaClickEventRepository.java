@@ -34,6 +34,13 @@ class JpaClickEventRepository implements ClickEventRepository {
     }
 
     @Override
+    public List<ClickEvent> findAllByShortUrlIdIn(List<Long> shortUrlIds) {
+        return clickEventEntityRepository.findByShortUrlIdIn(shortUrlIds).stream()
+            .map(ClickEventJpaEntity::toDomain)
+            .toList();
+    }
+
+    @Override
     public void deleteAll(Iterable<ClickEvent> clickEvents) {
         List<ClickEventJpaEntity> entities = new ArrayList<>();
         clickEvents.forEach(clickEvent -> entities.add(ClickEventJpaEntity.from(clickEvent)));
