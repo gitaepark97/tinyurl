@@ -34,10 +34,23 @@ class JpaClickEventRepository implements ClickEventRepository {
     }
 
     @Override
+    public List<ClickEvent> findByShortUrlIdInAndIdGreaterThanOrderByIdAsc(List<Long> shortUrlIds, Long id, int limit) {
+        return clickEventEntityRepository
+            .findByShortUrlIdInAndIdGreaterThanOrderByIdAsc(shortUrlIds, id, PageRequest.of(0, limit)).stream()
+            .map(ClickEventJpaEntity::toDomain)
+            .toList();
+    }
+
+    @Override
     public void deleteAll(Iterable<ClickEvent> clickEvents) {
         List<ClickEventJpaEntity> entities = new ArrayList<>();
         clickEvents.forEach(clickEvent -> entities.add(ClickEventJpaEntity.from(clickEvent)));
         clickEventEntityRepository.deleteAllInBatch(entities);
+    }
+
+    @Override
+    public void deleteAllByShortUrlIdIn(List<Long> shortUrlIds) {
+        clickEventEntityRepository.deleteAllByShortUrlIdIn(shortUrlIds);
     }
 
 }

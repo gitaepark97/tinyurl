@@ -1,0 +1,6 @@
+app:
+  storage:
+    s3:
+      bucket: ${ARCHIVE_S3_BUCKET}
+      region: ${ARCHIVE_S3_REGION}
+      endpoint: ${ARCHIVE_S3_ENDPOINT:}

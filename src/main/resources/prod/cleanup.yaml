@@ -1,0 +1,8 @@
+app:
+  cleanup:
+    short-url:
+      chunk-size: 1000
+      max-chunks-per-run: 100
+      click-event-archive-page-size: 5000
+      grace-period-minutes: 15
+      cron: "0 0 4 * * *"

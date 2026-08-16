@@ -37,4 +37,9 @@ class JpaClickCountRepository implements ClickCountRepository {
         clickCountEntityRepository.deleteById(shortUrlId);
     }
 
+    @Override
+    public void deleteAllById(Iterable<Long> shortUrlIds) {
+        clickCountEntityRepository.deleteAllByIdInBatch(shortUrlIds);
+    }
+
 }
