@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.port.ClickCountRepository;
-import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.clickevent.port.ClickCountRepository;
+import com.hugo.tinyurl.clickevent.port.ClickEventRepository;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -10,10 +10,10 @@ import static org.mockito.Mockito.verify;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.model.ClickEvent;
-import com.hugo.tinyurl.domain.model.ShortUrl;
-import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.clickevent.model.ClickEvent;
+import com.hugo.tinyurl.clickevent.port.ClickEventRepository;
 import com.hugo.tinyurl.common.port.DistributedLock;
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ShortUrlArchiveRepository;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import io.micrometer.core.instrument.MeterRegistry;

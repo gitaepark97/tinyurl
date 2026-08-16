@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.domain.application;
 
+import com.hugo.tinyurl.clickevent.application.ClickEventManager;
 import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;

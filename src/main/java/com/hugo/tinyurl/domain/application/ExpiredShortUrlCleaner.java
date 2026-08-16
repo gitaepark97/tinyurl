@@ -1,12 +1,12 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.model.ClickCount;
-import com.hugo.tinyurl.domain.model.ClickEvent;
-import com.hugo.tinyurl.domain.model.ShortUrl;
-import com.hugo.tinyurl.domain.port.ClickCountRepository;
-import com.hugo.tinyurl.domain.port.ClickEventRepository;
+import com.hugo.tinyurl.clickevent.model.ClickCount;
+import com.hugo.tinyurl.clickevent.model.ClickEvent;
+import com.hugo.tinyurl.clickevent.port.ClickCountRepository;
+import com.hugo.tinyurl.clickevent.port.ClickEventRepository;
 import com.hugo.tinyurl.common.port.ClockProvider;
 import com.hugo.tinyurl.common.port.DistributedLock;
+import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ShortUrlArchiveRepository;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import io.micrometer.core.instrument.Counter;

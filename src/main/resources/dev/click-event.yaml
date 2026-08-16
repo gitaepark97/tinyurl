@@ -11,7 +11,7 @@ spring:
       auto-offset-reset: earliest
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: com.hugo.tinyurl.infra.messaging
+        spring.json.trusted.packages: com.hugo.tinyurl.clickevent.infra.messaging
 
 app:
   click-event:
