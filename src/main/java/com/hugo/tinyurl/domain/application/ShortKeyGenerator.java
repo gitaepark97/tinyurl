@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.domain.application;
 
-import com.hugo.tinyurl.domain.port.Counter;
+import com.hugo.tinyurl.common.port.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import io.micrometer.observation.annotation.Observed;

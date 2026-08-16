@@ -1,6 +1,6 @@
-package com.hugo.tinyurl.infra.coordination;
+package com.hugo.tinyurl.common.infra.coordination;
 
-import com.hugo.tinyurl.domain.port.Counter;
+import com.hugo.tinyurl.common.port.Counter;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

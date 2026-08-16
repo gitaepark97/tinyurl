@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.infra.coordination;
+package com.hugo.tinyurl.common.infra.coordination;
 
 import java.util.concurrent.TimeUnit;
 import org.apache.curator.RetryPolicy;

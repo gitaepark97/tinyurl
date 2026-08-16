@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.ShortUrl;
-import com.hugo.tinyurl.domain.port.IdGenerator;
+import com.hugo.tinyurl.common.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import java.time.LocalDateTime;
 import java.util.List;

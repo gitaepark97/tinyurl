@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.domain.port;
+package com.hugo.tinyurl.common.port;
 
 public interface IdGenerator {
 

@@ -1,10 +1,10 @@
-package com.hugo.tinyurl.infra.coordination;
+package com.hugo.tinyurl.common.infra.coordination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.port.DistributedLock;
+import com.hugo.tinyurl.common.port.DistributedLock;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

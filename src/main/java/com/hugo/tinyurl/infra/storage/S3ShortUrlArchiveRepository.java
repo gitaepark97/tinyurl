@@ -3,7 +3,7 @@ package com.hugo.tinyurl.infra.storage;
 import com.hugo.tinyurl.domain.model.ClickCount;
 import com.hugo.tinyurl.domain.model.ClickEvent;
 import com.hugo.tinyurl.domain.model.ShortUrl;
-import com.hugo.tinyurl.domain.port.ClockProvider;
+import com.hugo.tinyurl.common.port.ClockProvider;
 import com.hugo.tinyurl.domain.port.ShortUrlArchiveRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;

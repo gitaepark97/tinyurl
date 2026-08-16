@@ -11,7 +11,7 @@ import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ClickCountRepository;
 import com.hugo.tinyurl.domain.port.ClickEventRepository;
-import com.hugo.tinyurl.domain.port.IdGenerator;
+import com.hugo.tinyurl.common.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;

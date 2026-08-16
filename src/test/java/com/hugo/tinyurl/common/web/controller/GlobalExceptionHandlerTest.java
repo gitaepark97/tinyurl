@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.web.controller;
+package com.hugo.tinyurl.common.web.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

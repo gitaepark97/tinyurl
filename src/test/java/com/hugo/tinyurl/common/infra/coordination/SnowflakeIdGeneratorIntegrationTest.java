@@ -1,10 +1,10 @@
-package com.hugo.tinyurl.infra.coordination;
+package com.hugo.tinyurl.common.infra.coordination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.domain.port.Counter;
+import com.hugo.tinyurl.common.port.IdGenerator;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -15,24 +15,19 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @Import(TestcontainersConfiguration.class)
-class ZookeeperCounterTest {
+class SnowflakeIdGeneratorIntegrationTest {
 
     @Autowired
-    Counter counter;
+    IdGenerator idGenerator;
 
     @Test
-    void returnsMonotonicallyIncreasingDistinctValues() {
-        Set<Long> values = new HashSet<>();
-        long previous = -1;
-
+    void generatesDistinctIdsViaZooKeeperAssignedWorkerId() {
+        Set<Long> ids = new HashSet<>();
         for (int i = 0; i < 100; i++) {
-            long value = counter.next();
-            assertThat(value).isGreaterThan(previous);
-            previous = value;
-            values.add(value);
+            ids.add(idGenerator.generate());
         }
 
-        assertThat(values).hasSize(100);
+        assertThat(ids).hasSize(100);
     }
 
 }

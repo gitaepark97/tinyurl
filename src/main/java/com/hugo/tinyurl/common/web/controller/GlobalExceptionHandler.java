@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.web.controller;
+package com.hugo.tinyurl.common.web.controller;
 
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;

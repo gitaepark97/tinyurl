@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.domain.model.Member;
-import com.hugo.tinyurl.domain.port.ClockProvider;
-import com.hugo.tinyurl.domain.port.IdGenerator;
+import com.hugo.tinyurl.common.port.ClockProvider;
+import com.hugo.tinyurl.common.port.IdGenerator;
 import com.hugo.tinyurl.domain.port.MemberRepository;
 import com.hugo.tinyurl.domain.port.PasswordEncoder;
 import com.hugo.tinyurl.support.exception.BusinessException;

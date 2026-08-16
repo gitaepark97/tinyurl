@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.infra.persistence.jpa;
 
+import com.hugo.tinyurl.common.infra.persistence.jpa.AppendOnlyJpaEntity;
 import com.hugo.tinyurl.domain.model.ClickEvent;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

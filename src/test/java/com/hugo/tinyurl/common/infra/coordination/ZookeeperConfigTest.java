@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.infra.coordination;
+package com.hugo.tinyurl.common.infra.coordination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
