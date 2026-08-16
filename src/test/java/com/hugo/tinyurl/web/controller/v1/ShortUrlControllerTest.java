@@ -18,17 +18,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.hugo.tinyurl.domain.application.ShortUrlService;
-import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
+import com.hugo.tinyurl.member.model.Role;
+import com.hugo.tinyurl.member.web.security.ApiAccessDeniedHandler;
+import com.hugo.tinyurl.member.web.security.ApiAuthenticationEntryPoint;
+import com.hugo.tinyurl.member.web.security.AuthenticatedMember;
+import com.hugo.tinyurl.member.web.security.SecurityConfig;
+import com.hugo.tinyurl.member.web.security.TokenProvider;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
-import com.hugo.tinyurl.web.security.ApiAccessDeniedHandler;
-import com.hugo.tinyurl.web.security.ApiAuthenticationEntryPoint;
-import com.hugo.tinyurl.web.security.AuthenticatedMember;
-import com.hugo.tinyurl.web.security.SecurityConfig;
-import com.hugo.tinyurl.web.security.TokenProvider;
 import io.jsonwebtoken.Claims;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

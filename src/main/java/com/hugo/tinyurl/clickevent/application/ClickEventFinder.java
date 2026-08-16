@@ -2,9 +2,9 @@ package com.hugo.tinyurl.clickevent.application;
 
 import com.hugo.tinyurl.clickevent.model.ClickEvent;
 import com.hugo.tinyurl.clickevent.port.ClickEventRepository;
-import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.port.ShortUrlRepository;
+import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;

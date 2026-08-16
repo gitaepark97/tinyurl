@@ -1,9 +1,10 @@
 package com.hugo.tinyurl.web.controller.v1;
 
 import com.hugo.tinyurl.domain.application.ShortUrlService;
-import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
+import com.hugo.tinyurl.member.model.Role;
+import com.hugo.tinyurl.member.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
@@ -11,7 +12,6 @@ import com.hugo.tinyurl.support.page.PageParam;
 import com.hugo.tinyurl.support.response.ApiResponse;
 import com.hugo.tinyurl.web.controller.v1.request.ShortUrlCreateRequest;
 import com.hugo.tinyurl.web.controller.v1.response.ShortUrlResponse;
-import com.hugo.tinyurl.web.security.AuthenticatedMember;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

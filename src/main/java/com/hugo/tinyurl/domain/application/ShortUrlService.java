@@ -1,9 +1,9 @@
 package com.hugo.tinyurl.domain.application;
 
 import com.hugo.tinyurl.clickevent.application.ClickEventManager;
-import com.hugo.tinyurl.domain.model.Role;
 import com.hugo.tinyurl.domain.model.ShortUrl;
 import com.hugo.tinyurl.domain.model.ShortUrlWithClickCount;
+import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import io.micrometer.observation.annotation.Observed;
