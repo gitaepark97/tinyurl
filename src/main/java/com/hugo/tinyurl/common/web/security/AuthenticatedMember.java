@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.member.web.security;
+package com.hugo.tinyurl.common.web.security;
 
 import com.hugo.tinyurl.member.model.Role;
 import org.springframework.security.core.Authentication;

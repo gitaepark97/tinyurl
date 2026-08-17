@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.member.web;
 
+import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.application.MemberService;
 import com.hugo.tinyurl.member.model.Member;
 import com.hugo.tinyurl.member.model.Role;
@@ -8,7 +9,6 @@ import com.hugo.tinyurl.member.web.request.RefreshRequest;
 import com.hugo.tinyurl.member.web.request.SignupRequest;
 import com.hugo.tinyurl.member.web.response.MemberResponse;
 import com.hugo.tinyurl.member.web.response.TokenResponse;
-import com.hugo.tinyurl.member.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.web.security.TokenProvider;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;

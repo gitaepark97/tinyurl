@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.member.web.security;
 
+import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

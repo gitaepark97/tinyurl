@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.member.web.security;
 
+import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
