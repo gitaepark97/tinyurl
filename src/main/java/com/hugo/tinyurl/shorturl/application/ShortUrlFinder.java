@@ -83,16 +83,27 @@ class ShortUrlFinder {
 
     @Transactional(readOnly = true)
     ShortUrlWithClickCount get(Long id, Long requesterMemberId, Role requesterRole) {
-        ShortUrl shortUrl = shortUrlRepository.findById(id)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
-        if (requesterRole != Role.ADMIN && !shortUrl.isOwnedBy(requesterMemberId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
-        }
+        ShortUrl shortUrl = findOwnedOrThrow(id, requesterMemberId, requesterRole);
         long clickCount = clickCountRepository.findById(shortUrl.id())
             .map(ClickCount::count)
             .orElse(0L);
 
         return ShortUrlWithClickCount.of(shortUrl, clickCount);
+    }
+
+    // get()과 달리 클릭 수는 조회하지 않는다 - 호출자가 소유자/관리자 여부만 확인하면 되는 경우용.
+    @Transactional(readOnly = true)
+    void checkAccess(Long id, Long requesterMemberId, Role requesterRole) {
+        findOwnedOrThrow(id, requesterMemberId, requesterRole);
+    }
+
+    private ShortUrl findOwnedOrThrow(Long id, Long requesterMemberId, Role requesterRole) {
+        ShortUrl shortUrl = shortUrlRepository.findById(id)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND));
+        if (requesterRole != Role.ADMIN && !shortUrl.isOwnedBy(requesterMemberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        return shortUrl;
     }
 
     // 만료 여부는 여기서 걸러내지 않는다 - find()가 not_found/expired를 캐시 신선도와 무관하게

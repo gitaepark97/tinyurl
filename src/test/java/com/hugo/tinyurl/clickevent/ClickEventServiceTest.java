@@ -1,20 +1,17 @@
-package com.hugo.tinyurl.clickevent.application;
+package com.hugo.tinyurl.clickevent;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.clickevent.application.ClickEventTestSupport;
 import com.hugo.tinyurl.clickevent.model.ClickCount;
 import com.hugo.tinyurl.clickevent.model.ClickEvent;
 import com.hugo.tinyurl.clickevent.port.ClickCountRepository;
 import com.hugo.tinyurl.clickevent.port.ClickEventRepository;
 import com.hugo.tinyurl.common.port.IdGenerator;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.shorturl.model.ShortUrl;
 import com.hugo.tinyurl.shorturl.port.ShortUrlRepository;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import com.hugo.tinyurl.support.page.Page;
 import com.hugo.tinyurl.support.page.PageParam;
 import java.time.LocalDateTime;
@@ -76,7 +73,7 @@ class ClickEventServiceTest {
             saved.add(createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null));
         }
 
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), null, Role.ADMIN, new PageParam(null, 2));
+        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), new PageParam(null, 2));
 
         assertThat(page.content()).extracting(ClickEvent::id)
             .containsExactly(saved.get(2).id(), saved.get(1).id());
@@ -88,7 +85,7 @@ class ClickEventServiceTest {
         ShortUrl shortUrl = createShortUrl(LocalDateTime.now().plusDays(7));
         ClickEvent event = createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null);
 
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), null, Role.ADMIN, new PageParam(null, 20));
+        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), new PageParam(null, 20));
 
         assertThat(page.content()).extracting(ClickEvent::id).containsExactly(event.id());
         assertThat(page.hasNext()).isFalse();
@@ -102,7 +99,7 @@ class ClickEventServiceTest {
             saved.add(createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null));
         }
 
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), null, Role.ADMIN, new PageParam(saved.get(1).id(), 20));
+        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), new PageParam(saved.get(1).id(), 20));
 
         assertThat(page.content()).extracting(ClickEvent::id).containsExactly(saved.get(0).id());
         assertThat(page.hasNext()).isFalse();
@@ -113,53 +110,19 @@ class ClickEventServiceTest {
         ShortUrl expired = createShortUrl(LocalDateTime.now().minusDays(1));
         ClickEvent event = createClickEvent(expired.id(), "127.0.0.1", "agent", null);
 
-        Page<ClickEvent> page = clickEventService.findAll(expired.id(), null, Role.ADMIN, new PageParam(null, 20));
+        Page<ClickEvent> page = clickEventService.findAll(expired.id(), new PageParam(null, 20));
 
         assertThat(page.content()).extracting(ClickEvent::id).containsExactly(event.id());
     }
 
     @Test
-    void throwsNotFoundForUnknownShortUrlId() {
-        assertThatThrownBy(() -> clickEventService.findAll(Long.MAX_VALUE, null, Role.ADMIN, new PageParam(null, 20)))
-            .isInstanceOf(BusinessException.class)
-            .extracting(e -> ((BusinessException) e).errorCode())
-            .isEqualTo(ErrorCode.NOT_FOUND);
-    }
+    void returnsEmptyPageForUnknownShortUrlId() {
+        // shortUrlId 존재 여부/소유자 확인은 이제 clickevent의 책임이 아니라 호출자(shorturl)가
+        // 먼저 검증한다 - clickevent는 그냥 조회된 클릭 이벤트가 없으면 빈 페이지를 돌려준다.
+        Page<ClickEvent> page = clickEventService.findAll(Long.MAX_VALUE, new PageParam(null, 20));
 
-    @Test
-    void allowsOwnerToViewOwnClickEvents() {
-        ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl(idGenerator.generate(), "own" + (System.nanoTime() % 10000), "https://example.com", 1L,
-                LocalDateTime.now().plusDays(7), LocalDateTime.now()));
-        createdShortUrlIds.add(shortUrl.id());
-        ClickEvent event = createClickEvent(shortUrl.id(), "127.0.0.1", "agent", null);
-
-        Page<ClickEvent> page = clickEventService.findAll(shortUrl.id(), 1L, Role.MEMBER, new PageParam(null, 20));
-
-        assertThat(page.content()).extracting(ClickEvent::id).containsExactly(event.id());
-    }
-
-    @Test
-    void rejectsNonOwnerNonAdminWithForbidden() {
-        ShortUrl shortUrl = shortUrlRepository.save(
-            new ShortUrl(idGenerator.generate(), "oth" + (System.nanoTime() % 10000), "https://example.com", 1L,
-                LocalDateTime.now().plusDays(7), LocalDateTime.now()));
-        createdShortUrlIds.add(shortUrl.id());
-
-        assertThatThrownBy(() -> clickEventService.findAll(shortUrl.id(), 2L, Role.MEMBER, new PageParam(null, 20)))
-            .isInstanceOf(BusinessException.class)
-            .extracting(e -> ((BusinessException) e).errorCode())
-            .isEqualTo(ErrorCode.FORBIDDEN);
-    }
-
-    @Test
-    void rejectsAnonymousUrlAccessForNonAdmin() {
-        ShortUrl shortUrl = createShortUrl(LocalDateTime.now().plusDays(7));
-
-        assertThatThrownBy(() -> clickEventService.findAll(shortUrl.id(), 1L, Role.MEMBER, new PageParam(null, 20)))
-            .isInstanceOf(BusinessException.class)
-            .extracting(e -> ((BusinessException) e).errorCode())
-            .isEqualTo(ErrorCode.FORBIDDEN);
+        assertThat(page.content()).isEmpty();
+        assertThat(page.hasNext()).isFalse();
     }
 
     @Test

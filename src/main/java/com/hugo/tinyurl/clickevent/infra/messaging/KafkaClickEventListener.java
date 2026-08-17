@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.clickevent.infra.messaging;
 
-import com.hugo.tinyurl.clickevent.application.ClickEventService;
+import com.hugo.tinyurl.clickevent.ClickEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;

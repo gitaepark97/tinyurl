@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.clickevent.web.response;
+package com.hugo.tinyurl.shorturl.web.response;
 
 import com.hugo.tinyurl.clickevent.model.ClickEvent;
 import java.time.LocalDateTime;

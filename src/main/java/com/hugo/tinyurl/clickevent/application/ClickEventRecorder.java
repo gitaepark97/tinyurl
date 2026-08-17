@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Observed
 @Slf4j
 @Component
-class ClickEventRecorder {
+public class ClickEventRecorder {
 
     private final ClickEventRepository clickEventRepository;
     private final ClickCountRepository clickCountRepository;
@@ -47,7 +47,7 @@ class ClickEventRecorder {
         includes = {TransientDataAccessException.class, DataIntegrityViolationException.class},
         maxRetries = 2, delay = 200, multiplier = 2
     )
-    void record(Long shortUrlId, String ipAddress, String userAgent, String referer, String deliveryKey) {
+    public void record(Long shortUrlId, String ipAddress, String userAgent, String referer, String deliveryKey) {
         if (clickEventRepository.existsByDeliveryKey(deliveryKey)) {
             duplicateCounter.increment();
             log.info("중복 전달된 클릭 이벤트 스킵 - deliveryKey={}", deliveryKey);

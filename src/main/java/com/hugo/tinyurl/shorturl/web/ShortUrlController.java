@@ -1,11 +1,14 @@
 package com.hugo.tinyurl.shorturl.web;
 
+import com.hugo.tinyurl.clickevent.ClickEventService;
+import com.hugo.tinyurl.clickevent.model.ClickEvent;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.shorturl.application.ShortUrlService;
 import com.hugo.tinyurl.shorturl.model.ShortUrl;
 import com.hugo.tinyurl.shorturl.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.shorturl.web.request.ShortUrlCreateRequest;
+import com.hugo.tinyurl.shorturl.web.response.ClickEventResponse;
 import com.hugo.tinyurl.shorturl.web.response.ShortUrlResponse;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
@@ -30,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 class ShortUrlController {
 
     private final ShortUrlService shortUrlService;
+    private final ClickEventService clickEventService;
 
     @Value("${app.short-url.base-url}")
     private String baseUrl;
@@ -64,6 +68,15 @@ class ShortUrlController {
         Role requesterRole = AuthenticatedMember.roleOrNull(authentication);
         ShortUrlWithClickCount view = shortUrlService.find(id, requesterMemberId, requesterRole);
         return ApiResponse.success(ShortUrlResponse.from(view, baseUrl));
+    }
+
+    @GetMapping("/api/v1/urls/{id}/click-events")
+    ApiResponse<Page<ClickEventResponse>> findClickEvents(@PathVariable Long id, @ModelAttribute PageParam pageParam, Authentication authentication) {
+        Long requesterMemberId = AuthenticatedMember.memberIdOrNull(authentication);
+        Role requesterRole = AuthenticatedMember.roleOrNull(authentication);
+        shortUrlService.checkAccess(id, requesterMemberId, requesterRole);
+        Page<ClickEvent> page = clickEventService.findAll(id, pageParam);
+        return ApiResponse.success(page.map(ClickEventResponse::from));
     }
 
 }

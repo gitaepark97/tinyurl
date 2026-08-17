@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.shorturl.application;
 
+import com.hugo.tinyurl.clickevent.ShortUrlVisitedEvent;
 import com.hugo.tinyurl.member.model.Role;
-import com.hugo.tinyurl.shorturl.ShortUrlVisitedEvent;
 import com.hugo.tinyurl.shorturl.model.ShortUrl;
 import com.hugo.tinyurl.shorturl.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.page.Page;
@@ -42,6 +42,11 @@ public class ShortUrlService {
 
     public ShortUrlWithClickCount find(Long id, Long requesterMemberId, Role requesterRole) {
         return shortUrlFinder.get(id, requesterMemberId, requesterRole);
+    }
+
+    // NOT_FOUND/FORBIDDEN 여부만 필요하고 조회 결과 자체는 필요 없는 호출자(clickevent 등)를 위한 것.
+    public void checkAccess(Long id, Long requesterMemberId, Role requesterRole) {
+        shortUrlFinder.checkAccess(id, requesterMemberId, requesterRole);
     }
 
     // 이벤트 발행이 이벤트 발행 레지스트리에 기록되고 커밋 후에 리스너가 실행되려면

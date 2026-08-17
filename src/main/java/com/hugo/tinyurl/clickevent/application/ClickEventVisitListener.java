@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.clickevent.application;
 
-import com.hugo.tinyurl.shorturl.ShortUrlVisitedEvent;
+import com.hugo.tinyurl.clickevent.ShortUrlVisitedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.shorturl.ShortUrlVisitedEvent;
+import com.hugo.tinyurl.clickevent.ShortUrlVisitedEvent;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;

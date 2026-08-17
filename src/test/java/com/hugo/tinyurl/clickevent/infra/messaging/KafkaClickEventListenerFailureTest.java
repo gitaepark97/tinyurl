@@ -6,7 +6,7 @@ import static org.mockito.BDDMockito.willThrow;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.clickevent.application.ClickEventService;
+import com.hugo.tinyurl.clickevent.ClickEventService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -7,7 +7,7 @@ import static org.mockito.BDDMockito.willThrow;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
-import com.hugo.tinyurl.clickevent.application.ClickEventService;
+import com.hugo.tinyurl.clickevent.ClickEventService;
 import com.hugo.tinyurl.clickevent.port.ClickEventPublisher;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
