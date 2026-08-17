@@ -71,6 +71,13 @@ dependencies {
     implementation(platform("software.amazon.awssdk:bom:2.46.7"))
     implementation("software.amazon.awssdk:s3")
 
+    // Spring Modulith — 모듈 경계 검증 + 모듈 간 통신용 애플리케이션 이벤트(발행 레지스트리 포함)
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+    runtimeOnly("org.springframework.modulith:spring-modulith-actuator")
+    runtimeOnly("org.springframework.modulith:spring-modulith-observability")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+
     // 코드 생성
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
@@ -100,6 +107,13 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+val springModulithVersion by extra("2.1.0")
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.modulith:spring-modulith-bom:$springModulithVersion")
+    }
 }
 
 tasks.jar {
