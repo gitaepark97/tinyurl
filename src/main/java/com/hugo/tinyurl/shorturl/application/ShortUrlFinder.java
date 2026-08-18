@@ -2,8 +2,8 @@ package com.hugo.tinyurl.shorturl.application;
 
 import com.hugo.tinyurl.clickevent.model.ClickCount;
 import com.hugo.tinyurl.clickevent.port.ClickCountRepository;
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.common.port.ClockProvider;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.shorturl.model.ShortUrl;
 import com.hugo.tinyurl.shorturl.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.shorturl.port.ShortUrlCacheRepository;

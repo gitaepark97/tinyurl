@@ -1,6 +1,6 @@
 package com.hugo.tinyurl.common.web.security;
 
-import com.hugo.tinyurl.member.model.Role;
+import com.hugo.tinyurl.common.model.Role;
 import org.springframework.security.core.Authentication;
 
 public record AuthenticatedMember(Long memberId, Role role) {

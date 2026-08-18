@@ -21,8 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.hugo.tinyurl.clickevent.ClickEventService;
 import com.hugo.tinyurl.clickevent.model.ClickEvent;
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.member.web.security.ApiAccessDeniedHandler;
 import com.hugo.tinyurl.member.web.security.ApiAuthenticationEntryPoint;
 import com.hugo.tinyurl.member.web.security.SecurityConfig;

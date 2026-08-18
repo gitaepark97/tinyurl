@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.member.infra.persistence.jpa;
 
 import com.hugo.tinyurl.common.infra.persistence.jpa.AppendOnlyJpaEntity;
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

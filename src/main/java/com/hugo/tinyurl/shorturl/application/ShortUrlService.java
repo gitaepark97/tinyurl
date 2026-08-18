@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.shorturl.application;
 
 import com.hugo.tinyurl.clickevent.ShortUrlVisitedEvent;
-import com.hugo.tinyurl.member.model.Role;
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.shorturl.model.ShortUrl;
 import com.hugo.tinyurl.shorturl.model.ShortUrlWithClickCount;
 import com.hugo.tinyurl.support.page.Page;

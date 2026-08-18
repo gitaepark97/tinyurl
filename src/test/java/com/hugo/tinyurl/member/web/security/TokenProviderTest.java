@@ -2,8 +2,8 @@ package com.hugo.tinyurl.member.web.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
-import com.hugo.tinyurl.member.model.Role;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.Test;
 
