@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.clickevent.ShortUrlVisitedEvent;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.tracing.Tracer;
@@ -23,14 +24,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.micrometer.tracing.test.autoconfigure.AutoConfigureTracing;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.kafka.KafkaContainer;
 
 // SpringBootTest는 기본적으로 트레이싱 export(propagation 포함)를 꺼버리므로 다시 켜야 한다.
+// ClickEventVisitListener(@ApplicationModuleListener)가 실행되는 @Async 경계를 넘어 이
+// Observation이 전파돼야 Kafka publish의 producer span이 자식으로 연결되고 traceId가 헤더에 실린다.
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
 @AutoConfigureTracing
 @Import(TestcontainersConfiguration.class)
-class ClickEventManagerContextPropagationTest {
+class ClickEventVisitListenerContextPropagationTest {
 
     @Autowired
     Tracer tracer;
@@ -39,7 +45,10 @@ class ClickEventManagerContextPropagationTest {
     ObservationRegistry observationRegistry;
 
     @Autowired
-    ClickEventManager clickEventManager;
+    ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     @Autowired
     KafkaContainer kafkaContainer;
@@ -62,13 +71,14 @@ class ClickEventManagerContextPropagationTest {
         consumer = newConsumer();
         consumer.subscribe(List.of(topic));
 
-        // @Async 경계를 넘어 clickEventPublishExecutor 스레드까지 이 Observation이 전파돼야
-        // Kafka publish의 producer span이 자식으로 연결되고 traceId가 헤더에 실린다.
         Observation observation = Observation.createNotStarted("test-record", observationRegistry).start();
         String traceId;
         try (Observation.Scope ignored = observation.openScope()) {
             traceId = tracer.currentSpan().context().traceId();
-            clickEventManager.record(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com");
+            // @ApplicationModuleListener는 AFTER_COMMIT에서 실행되므로 실제로 커밋되는 트랜잭션이 필요하다 -
+            // 테스트 트랜잭션(롤백)이 아니라 별도의 실제 트랜잭션을 프로그래밍 방식으로 연다.
+            new TransactionTemplate(transactionManager).executeWithoutResult(status ->
+                eventPublisher.publishEvent(new ShortUrlVisitedEvent(shortUrlId, "127.0.0.1", "test-agent", "https://referer.example.com")));
         } finally {
             observation.stop();
         }
@@ -84,7 +94,7 @@ class ClickEventManagerContextPropagationTest {
     private KafkaConsumer<String, String> newConsumer() {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "click-event-manager-test-" + System.nanoTime());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "click-event-visit-listener-test-" + System.nanoTime());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

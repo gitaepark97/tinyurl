@@ -13,6 +13,8 @@ spring:
       - optional:${spring.profiles.active}/cleanup.yaml
       - optional:${spring.profiles.active}/management.yaml
       - optional:${spring.profiles.active}/app.yaml
+  modulith:
+    republish-outstanding-events-on-restart: true
 
 ---
 spring:
