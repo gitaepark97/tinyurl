@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.provider;
+package com.hugo.tinyurl.common.infra.provider;
 
 import com.hugo.tinyurl.common.port.ClockProvider;
 import java.time.Clock;
