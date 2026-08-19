@@ -1,9 +1,9 @@
 package com.hugo.tinyurl.member.infra.persistence;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.member.infra.persistence.jpa.MemberEntityRepository;
 import com.hugo.tinyurl.member.infra.persistence.jpa.MemberJpaEntity;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.member.port.MemberRepository;
 import java.util.List;
 import java.util.Optional;

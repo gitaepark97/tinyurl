@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.member.application;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import io.micrometer.observation.annotation.Observed;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;

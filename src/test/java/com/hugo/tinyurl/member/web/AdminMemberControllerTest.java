@@ -14,10 +14,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.application.MemberService;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.member.web.security.ApiAccessDeniedHandler;
 import com.hugo.tinyurl.member.web.security.ApiAuthenticationEntryPoint;
 import com.hugo.tinyurl.member.web.security.SecurityConfig;

@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.member.port;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import java.util.Optional;
 
 public interface MemberRepository {

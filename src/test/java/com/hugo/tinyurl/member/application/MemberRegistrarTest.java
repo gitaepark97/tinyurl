@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.hugo.tinyurl.TestcontainersConfiguration;
 import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.member.port.MemberRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;

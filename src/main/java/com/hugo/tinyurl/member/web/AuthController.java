@@ -1,9 +1,9 @@
 package com.hugo.tinyurl.member.web;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.application.MemberService;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 import com.hugo.tinyurl.member.web.request.LoginRequest;
 import com.hugo.tinyurl.member.web.request.RefreshRequest;
 import com.hugo.tinyurl.member.web.request.SignupRequest;

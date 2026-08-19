@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.member.web.response;
 
+import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.member.model.Member;
-import com.hugo.tinyurl.member.model.Role;
 
 public record MemberRoleResponse(
     Long id,

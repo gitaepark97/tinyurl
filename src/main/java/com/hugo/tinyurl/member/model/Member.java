@@ -1,5 +1,6 @@
 package com.hugo.tinyurl.member.model;
 
+import com.hugo.tinyurl.common.model.Role;
 import java.time.LocalDateTime;
 
 public record Member(

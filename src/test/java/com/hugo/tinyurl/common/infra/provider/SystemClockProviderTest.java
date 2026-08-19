@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.provider;
+package com.hugo.tinyurl.common.infra.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
