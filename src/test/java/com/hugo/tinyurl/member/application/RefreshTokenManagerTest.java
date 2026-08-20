@@ -3,8 +3,9 @@ package com.hugo.tinyurl.member.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.hugo.tinyurl.TestcontainersConfiguration;
-import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.MySqlTestcontainersConfiguration;
+import com.hugo.tinyurl.RedisTestcontainersConfiguration;
+import com.hugo.tinyurl.ZookeeperTestcontainersConfiguration;
 import com.hugo.tinyurl.member.port.RefreshTokenRepository;
 import com.hugo.tinyurl.support.exception.BusinessException;
 import com.hugo.tinyurl.support.exception.ErrorCode;
@@ -12,12 +13,17 @@ import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Import;
+import org.springframework.modulith.test.ApplicationModuleTest;
+import org.springframework.modulith.test.ApplicationModuleTest.BootstrapMode;
 
-@SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.NONE)
-@Import(TestcontainersConfiguration.class)
+@ApplicationModuleTest(value = BootstrapMode.DIRECT_DEPENDENCIES, webEnvironment = WebEnvironment.NONE)
+@Import({
+    MySqlTestcontainersConfiguration.class,
+    RedisTestcontainersConfiguration.class,
+    ZookeeperTestcontainersConfiguration.class
+})
 class RefreshTokenManagerTest {
 
     private static final Long MEMBER_ID = 1L;
