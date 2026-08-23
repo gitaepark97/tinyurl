@@ -2,8 +2,8 @@ package com.hugo.tinyurl.shorturl.web;
 
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.common.web.util.ClientIpResolver;
+import com.hugo.tinyurl.common.web.util.JsonErrorResponseWriter;
 import com.hugo.tinyurl.support.exception.ErrorCode;
-import com.hugo.tinyurl.support.response.ApiResponse;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
@@ -63,7 +62,7 @@ class AnonymousShortUrlCreationRateLimitFilter extends OncePerRequestFilter {
         if (tryConsume(request)) {
             filterChain.doFilter(request, response);
         } else {
-            writeTooManyRequests(response);
+            JsonErrorResponseWriter.write(response, ErrorCode.TOO_MANY_REQUESTS, objectMapper);
         }
     }
 
@@ -77,14 +76,6 @@ class AnonymousShortUrlCreationRateLimitFilter extends OncePerRequestFilter {
             log.warn("Rate limit 확인 실패 - 요청을 통과시킨다", e);
             return true;
         }
-    }
-
-    private void writeTooManyRequests(HttpServletResponse response) throws IOException {
-        ErrorCode errorCode = ErrorCode.TOO_MANY_REQUESTS;
-        response.setStatus(errorCode.status());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(
-            objectMapper.writeValueAsString(ApiResponse.error(errorCode.code(), errorCode.message())));
     }
 
 }
