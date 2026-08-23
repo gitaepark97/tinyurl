@@ -1,0 +1,73 @@
+package com.hugo.tinyurl.shorturl.web;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.hugo.tinyurl.TestcontainersConfiguration;
+import com.hugo.tinyurl.TinyurlApplication;
+import com.hugo.tinyurl.common.model.Role;
+import com.hugo.tinyurl.member.web.security.TokenProvider;
+import com.hugo.tinyurl.shorturl.web.request.ShortUrlCreateRequest;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+@SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
+@Import(TestcontainersConfiguration.class)
+class AnonymousShortUrlCreationRateLimitFilterTest {
+
+    @Autowired
+    TestRestTemplate restTemplate;
+
+    @Autowired
+    TokenProvider tokenProvider;
+
+    @Test
+    void blocksAnonymousRequestsOnceCapacityIsExhausted() {
+        HttpHeaders headers = forwardedFor("203.0.113.10");
+
+        for (int i = 0; i < 5; i++) {
+            ResponseEntity<String> response = restTemplate.exchange(
+                "/api/v1/urls", HttpMethod.POST, createRequest(headers), String.class);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        }
+
+        ResponseEntity<String> sixth = restTemplate.exchange(
+            "/api/v1/urls", HttpMethod.POST, createRequest(headers), String.class);
+
+        assertThat(sixth.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    @Test
+    void doesNotLimitAuthenticatedMemberRequests() {
+        HttpHeaders headers = forwardedFor("203.0.113.20");
+        headers.setBearerAuth(tokenProvider.generateAccessToken(999_999L, Role.MEMBER));
+
+        for (int i = 0; i < 6; i++) {
+            ResponseEntity<String> response = restTemplate.exchange(
+                "/api/v1/urls", HttpMethod.POST, createRequest(headers), String.class);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        }
+    }
+
+    private HttpHeaders forwardedFor(String ip) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Forwarded-For", ip);
+        return headers;
+    }
+
+    private HttpEntity<ShortUrlCreateRequest> createRequest(HttpHeaders headers) {
+        ShortUrlCreateRequest body = new ShortUrlCreateRequest("https://example.com/" + System.nanoTime(), null, null);
+        return new HttpEntity<>(body, headers);
+    }
+
+}
