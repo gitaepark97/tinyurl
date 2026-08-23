@@ -42,6 +42,10 @@ dependencies {
     // 분산 캐시
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
+    // 분산 Rate Limiting(Redis Lettuce 기반 토큰 버킷)
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
+    implementation("com.bucket4j:bucket4j_jdk17-lettuce:8.14.0")
+
     // 분산 유일 카운터(ZooKeeper)
     implementation("org.apache.curator:curator-recipes:5.9.0")
 
@@ -97,6 +101,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-opentelemetry-test")
     testImplementation("org.springframework.boot:spring-boot-starter-restdocs")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
+    testImplementation("org.springframework.boot:spring-boot-restclient")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-mysql")

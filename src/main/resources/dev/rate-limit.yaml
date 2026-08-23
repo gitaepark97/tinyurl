@@ -1,0 +1,6 @@
+app:
+  rate-limit:
+    anonymous-url-creation:
+      capacity: 5
+      refill-tokens: 5
+      refill-duration-seconds: 60

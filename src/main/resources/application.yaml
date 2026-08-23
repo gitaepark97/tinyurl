@@ -11,10 +11,15 @@ spring:
       - optional:${spring.profiles.active}/click-event.yaml
       - optional:${spring.profiles.active}/storage.yaml
       - optional:${spring.profiles.active}/cleanup.yaml
+      - optional:${spring.profiles.active}/rate-limit.yaml
       - optional:${spring.profiles.active}/management.yaml
       - optional:${spring.profiles.active}/app.yaml
   modulith:
     republish-outstanding-events-on-restart: true
+
+# 신뢰 가능한 프록시 대역에서 온 요청만 X-Forwarded-For를 getRemoteAddr()에 반영한다 - common.web.util.ClientIpResolver 참고.
+server:
+  forward-headers-strategy: native
 
 ---
 spring:
