@@ -9,6 +9,7 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(405, "METHOD_NOT_ALLOWED", "지원하지 않는 HTTP 메서드입니다"),
     CONFLICT(409, "CONFLICT", "이미 사용 중입니다"),
     LAST_ADMIN_DEMOTION(409, "LAST_ADMIN_DEMOTION", "마지막 관리자는 강등할 수 없습니다"),
+    TOO_MANY_REQUESTS(429, "TOO_MANY_REQUESTS", "요청이 너무 많습니다. 잠시 후 다시 시도해주세요"),
     INTERNAL_SERVER_ERROR(500, "INTERNAL_SERVER_ERROR", "서버 내부 오류가 발생했습니다");
 
     private final int status;
