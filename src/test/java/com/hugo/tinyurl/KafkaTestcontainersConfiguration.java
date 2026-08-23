@@ -13,7 +13,7 @@ public class KafkaTestcontainersConfiguration {
     @ServiceConnection
     KafkaContainer kafkaContainer() {
         // apache/kafka:3.9.0은 advertised.listeners 검증 실패로 기동이 안 돼 3.7.0을 쓴다.
-        return new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0"));
+        return new KafkaContainer(DockerImageName.parse("apache/kafka:3.7.0")).withReuse(true);
     }
 
 }

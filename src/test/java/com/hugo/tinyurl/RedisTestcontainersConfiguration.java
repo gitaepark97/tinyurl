@@ -12,7 +12,7 @@ public class RedisTestcontainersConfiguration {
     @Bean
     @ServiceConnection
     RedisContainer redisContainer() {
-        return new RedisContainer(DockerImageName.parse("redis:8.2-alpine"));
+        return new RedisContainer(DockerImageName.parse("redis:8.2-alpine")).withReuse(true);
     }
 
 }

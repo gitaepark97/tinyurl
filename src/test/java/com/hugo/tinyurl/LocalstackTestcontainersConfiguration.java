@@ -14,7 +14,7 @@ public class LocalstackTestcontainersConfiguration {
 
     @Bean
     LocalStackContainer localStackContainer() {
-        return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.8")).withServices(Service.S3);
+        return new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.8")).withServices(Service.S3).withReuse(true);
     }
 
     @Bean

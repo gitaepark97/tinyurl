@@ -11,7 +11,7 @@ public class ZookeeperTestcontainersConfiguration {
 
     @Bean
     GenericContainer<?> zookeeperContainer() {
-        return new GenericContainer<>(DockerImageName.parse("zookeeper:3.9.4")).withExposedPorts(2181);
+        return new GenericContainer<>(DockerImageName.parse("zookeeper:3.9.4")).withExposedPorts(2181).withReuse(true);
     }
 
     @Bean
