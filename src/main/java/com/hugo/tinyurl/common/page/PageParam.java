@@ -1,7 +1,7 @@
-package com.hugo.tinyurl.support.page;
+package com.hugo.tinyurl.common.page;
 
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 
 public record PageParam(
     Long cursor,

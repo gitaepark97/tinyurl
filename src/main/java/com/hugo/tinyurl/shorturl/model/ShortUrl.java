@@ -1,8 +1,7 @@
 package com.hugo.tinyurl.shorturl.model;
 
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
-
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 

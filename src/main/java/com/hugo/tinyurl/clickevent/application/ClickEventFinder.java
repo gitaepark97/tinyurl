@@ -2,8 +2,8 @@ package com.hugo.tinyurl.clickevent.application;
 
 import com.hugo.tinyurl.clickevent.model.ClickEvent;
 import com.hugo.tinyurl.clickevent.port.ClickEventRepository;
-import com.hugo.tinyurl.support.page.Page;
-import com.hugo.tinyurl.support.page.PageParam;
+import com.hugo.tinyurl.common.page.Page;
+import com.hugo.tinyurl.common.page.PageParam;
 import io.micrometer.observation.annotation.Observed;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

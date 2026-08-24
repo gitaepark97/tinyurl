@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.common.web.controller;
 
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
-import com.hugo.tinyurl.support.page.PageParam;
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
+import com.hugo.tinyurl.common.page.PageParam;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.GetMapping;

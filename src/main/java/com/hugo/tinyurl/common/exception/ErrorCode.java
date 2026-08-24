@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.exception;
+package com.hugo.tinyurl.common.exception;
 
 public enum ErrorCode {
 

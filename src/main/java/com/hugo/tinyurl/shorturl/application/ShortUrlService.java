@@ -2,10 +2,10 @@ package com.hugo.tinyurl.shorturl.application;
 
 import com.hugo.tinyurl.clickevent.ShortUrlVisitedEvent;
 import com.hugo.tinyurl.common.model.Role;
+import com.hugo.tinyurl.common.page.Page;
+import com.hugo.tinyurl.common.page.PageParam;
 import com.hugo.tinyurl.shorturl.model.ShortUrl;
 import com.hugo.tinyurl.shorturl.model.ShortUrlWithClickCount;
-import com.hugo.tinyurl.support.page.Page;
-import com.hugo.tinyurl.support.page.PageParam;
 import io.micrometer.observation.annotation.Observed;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;

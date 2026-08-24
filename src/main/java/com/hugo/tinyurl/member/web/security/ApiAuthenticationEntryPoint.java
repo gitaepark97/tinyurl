@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.member.web.security;
 
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.web.util.JsonErrorResponseWriter;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

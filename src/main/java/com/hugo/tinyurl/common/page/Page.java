@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.page;
+package com.hugo.tinyurl.common.page;
 
 import java.util.List;
 import java.util.function.Function;

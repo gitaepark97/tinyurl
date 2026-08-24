@@ -1,6 +1,9 @@
 package com.hugo.tinyurl.member.web;
 
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.model.Role;
+import com.hugo.tinyurl.common.web.response.ApiResponse;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.application.MemberService;
 import com.hugo.tinyurl.member.model.Member;
@@ -10,9 +13,6 @@ import com.hugo.tinyurl.member.web.request.SignupRequest;
 import com.hugo.tinyurl.member.web.response.MemberResponse;
 import com.hugo.tinyurl.member.web.response.TokenResponse;
 import com.hugo.tinyurl.member.web.security.TokenProvider;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
-import com.hugo.tinyurl.support.response.ApiResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
