@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.common.infra.coordination;
 
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.port.DistributedLock;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

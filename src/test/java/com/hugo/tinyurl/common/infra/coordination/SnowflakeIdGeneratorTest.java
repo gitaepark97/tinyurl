@@ -3,7 +3,7 @@ package com.hugo.tinyurl.common.infra.coordination;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.hugo.tinyurl.support.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.BusinessException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

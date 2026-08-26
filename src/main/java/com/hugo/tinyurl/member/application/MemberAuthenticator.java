@@ -1,10 +1,10 @@
 package com.hugo.tinyurl.member.application;
 
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.member.model.Member;
 import com.hugo.tinyurl.member.port.MemberRepository;
 import com.hugo.tinyurl.member.port.PasswordEncoder;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import io.micrometer.observation.annotation.Observed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

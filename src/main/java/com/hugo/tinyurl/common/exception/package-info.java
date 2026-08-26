@@ -1,2 +1,2 @@
 @org.springframework.modulith.NamedInterface("exception")
-package com.hugo.tinyurl.support.exception;
+package com.hugo.tinyurl.common.exception;

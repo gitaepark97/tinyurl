@@ -1,7 +1,7 @@
 package com.hugo.tinyurl.common.web.util;
 
-import com.hugo.tinyurl.support.exception.ErrorCode;
-import com.hugo.tinyurl.support.response.ApiResponse;
+import com.hugo.tinyurl.common.exception.ErrorCode;
+import com.hugo.tinyurl.common.web.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import org.springframework.http.MediaType;

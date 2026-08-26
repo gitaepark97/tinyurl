@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.common.infra.coordination;
 
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.port.IdGenerator;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import org.springframework.stereotype.Component;
 
 @Component

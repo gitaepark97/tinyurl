@@ -1,10 +1,10 @@
 package com.hugo.tinyurl.member.web;
 
+import com.hugo.tinyurl.common.web.response.ApiResponse;
 import com.hugo.tinyurl.member.application.MemberService;
 import com.hugo.tinyurl.member.model.Member;
 import com.hugo.tinyurl.member.web.request.MemberRoleUpdateRequest;
 import com.hugo.tinyurl.member.web.response.MemberRoleResponse;
-import com.hugo.tinyurl.support.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PatchMapping;

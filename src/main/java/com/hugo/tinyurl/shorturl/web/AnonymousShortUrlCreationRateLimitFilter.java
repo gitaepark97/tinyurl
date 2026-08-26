@@ -1,9 +1,9 @@
 package com.hugo.tinyurl.shorturl.web;
 
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.common.web.util.ClientIpResolver;
 import com.hugo.tinyurl.common.web.util.JsonErrorResponseWriter;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.BucketConfiguration;

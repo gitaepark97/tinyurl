@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.common.web.controller;
 
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
-import com.hugo.tinyurl.support.response.ApiResponse;
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
+import com.hugo.tinyurl.common.web.response.ApiResponse;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;

@@ -1,8 +1,8 @@
 package com.hugo.tinyurl.member.application;
 
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.member.port.RefreshTokenRepository;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import io.micrometer.observation.annotation.Observed;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;

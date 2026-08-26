@@ -2,7 +2,7 @@ package com.hugo.tinyurl.common.web.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.hugo.tinyurl.support.exception.ErrorCode;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

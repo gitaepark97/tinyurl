@@ -1,4 +1,4 @@
-package com.hugo.tinyurl.support.response;
+package com.hugo.tinyurl.common.web.response;
 
 public record ApiResponse<T>(
     String code,

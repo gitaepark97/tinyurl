@@ -15,6 +15,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.hugo.tinyurl.common.exception.BusinessException;
+import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.model.Role;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
 import com.hugo.tinyurl.member.application.MemberService;
@@ -23,8 +25,6 @@ import com.hugo.tinyurl.member.web.security.ApiAccessDeniedHandler;
 import com.hugo.tinyurl.member.web.security.ApiAuthenticationEntryPoint;
 import com.hugo.tinyurl.member.web.security.SecurityConfig;
 import com.hugo.tinyurl.member.web.security.TokenProvider;
-import com.hugo.tinyurl.support.exception.BusinessException;
-import com.hugo.tinyurl.support.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.MalformedJwtException;
 import java.time.LocalDateTime;
