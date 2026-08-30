@@ -2,7 +2,6 @@ package com.hugo.tinyurl.shorturl.web;
 
 import com.hugo.tinyurl.common.exception.ErrorCode;
 import com.hugo.tinyurl.common.web.security.AuthenticatedMember;
-import com.hugo.tinyurl.common.web.util.ClientIpResolver;
 import com.hugo.tinyurl.common.web.util.JsonErrorResponseWriter;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BucketConfiguration;
@@ -18,13 +17,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 
 // @Component로 등록하지 않는다 - Filter 빈은 @WebMvcTest에도 자동 포함되는데, shorturl 전용 설정에 의존해 슬라이스 테스트가 깨진다.
-class AnonymousShortUrlCreationRateLimitFilter extends OncePerRequestFilter {
+class MemberShortUrlCreationRateLimitFilter extends OncePerRequestFilter {
+
+    // 익명 필터의 IP 키(접두어 없음)와 네임스페이스가 섞이지 않도록 접두어를 붙인다.
+    private static final String BUCKET_KEY_PREFIX = "member:";
 
     private final ProxyManager<byte[]> proxyManager;
     private final ObjectMapper objectMapper;
     private final BucketConfiguration bucketConfiguration;
 
-    AnonymousShortUrlCreationRateLimitFilter(
+    MemberShortUrlCreationRateLimitFilter(
         ProxyManager<byte[]> proxyManager,
         ObjectMapper objectMapper,
         long capacity,
@@ -47,22 +49,22 @@ class AnonymousShortUrlCreationRateLimitFilter extends OncePerRequestFilter {
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
-        if (!"POST".equals(request.getMethod())
-            || AuthenticatedMember.memberIdOrNull(SecurityContextHolder.getContext().getAuthentication()) != null) {
+        Long memberId = AuthenticatedMember.memberIdOrNull(SecurityContextHolder.getContext().getAuthentication());
+        if (!"POST".equals(request.getMethod()) || memberId == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (tryConsume(request)) {
+        if (tryConsume(memberId)) {
             filterChain.doFilter(request, response);
         } else {
             JsonErrorResponseWriter.write(response, ErrorCode.TOO_MANY_REQUESTS, objectMapper);
         }
     }
 
-    private boolean tryConsume(HttpServletRequest request) {
-        String ip = ClientIpResolver.resolve(request);
-        return RateLimitBucketConsumer.tryConsume(proxyManager, ip, bucketConfiguration);
+    private boolean tryConsume(Long memberId) {
+        String key = BUCKET_KEY_PREFIX + memberId;
+        return RateLimitBucketConsumer.tryConsume(proxyManager, key, bucketConfiguration);
     }
 
 }

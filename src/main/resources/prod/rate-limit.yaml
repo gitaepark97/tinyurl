@@ -4,3 +4,7 @@ app:
       capacity: 5
       refill-tokens: 5
       refill-duration-seconds: 60
+    member-url-creation:
+      capacity: 30
+      refill-tokens: 30
+      refill-duration-seconds: 60
