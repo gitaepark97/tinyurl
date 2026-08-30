@@ -29,4 +29,20 @@ class RateLimitFilterRegistrationConfig {
         return registration;
     }
 
+    @Bean
+    FilterRegistrationBean<MemberShortUrlCreationRateLimitFilter> memberShortUrlCreationRateLimitFilterRegistration(
+        @Lazy ProxyManager<byte[]> proxyManager,
+        ObjectMapper objectMapper,
+        @Value("${app.rate-limit.member-url-creation.capacity}") long capacity,
+        @Value("${app.rate-limit.member-url-creation.refill-tokens}") long refillTokens,
+        @Value("${app.rate-limit.member-url-creation.refill-duration-seconds}") long refillDurationSeconds
+    ) {
+        MemberShortUrlCreationRateLimitFilter filter = new MemberShortUrlCreationRateLimitFilter(
+            proxyManager, objectMapper, capacity, refillTokens, refillDurationSeconds);
+        FilterRegistrationBean<MemberShortUrlCreationRateLimitFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.addUrlPatterns("/api/v1/urls");
+        registration.setOrder(SecurityFilterProperties.DEFAULT_FILTER_ORDER + 1);
+        return registration;
+    }
+
 }

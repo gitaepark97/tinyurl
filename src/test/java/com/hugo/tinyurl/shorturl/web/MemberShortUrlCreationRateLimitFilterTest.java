@@ -19,11 +19,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = TinyurlApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 @Import(TestcontainersConfiguration.class)
-class AnonymousShortUrlCreationRateLimitFilterTest {
+@TestPropertySource(properties = {
+    "app.rate-limit.member-url-creation.capacity=3",
+    "app.rate-limit.member-url-creation.refill-tokens=3",
+    "app.rate-limit.member-url-creation.refill-duration-seconds=60"
+})
+class MemberShortUrlCreationRateLimitFilterTest {
 
     @Autowired
     TestRestTemplate restTemplate;
@@ -32,38 +38,50 @@ class AnonymousShortUrlCreationRateLimitFilterTest {
     TokenProvider tokenProvider;
 
     @Test
-    void blocksAnonymousRequestsOnceCapacityIsExhausted() {
-        HttpHeaders headers = forwardedFor("203.0.113.10");
+    void blocksMemberRequestsOnceCapacityIsExhausted() {
+        HttpHeaders headers = authHeaders(1_000_001L);
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             ResponseEntity<String> response = restTemplate.exchange(
                 "/api/v1/urls", HttpMethod.POST, createRequest(headers), String.class);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         }
 
-        ResponseEntity<String> sixth = restTemplate.exchange(
+        ResponseEntity<String> fourth = restTemplate.exchange(
             "/api/v1/urls", HttpMethod.POST, createRequest(headers), String.class);
 
-        assertThat(sixth.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(fourth.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
     }
 
-    // 회원용 한도(로컬 기준 분당 30회)는 MemberShortUrlCreationRateLimitFilterTest가 별도로 검증한다 -
-    // 여기선 익명 필터가 인증된 요청을 건드리지 않는지만(한도 안에서 통과) 확인한다.
     @Test
-    void allowsAuthenticatedMemberRequestsWithinLimit() {
-        HttpHeaders headers = forwardedFor("203.0.113.20");
-        headers.setBearerAuth(tokenProvider.generateAccessToken(999_999L, Role.MEMBER));
+    void countsDifferentMembersIndependently() {
+        HttpHeaders exhaustedMember = authHeaders(1_000_002L);
+        for (int i = 0; i < 3; i++) {
+            restTemplate.exchange("/api/v1/urls", HttpMethod.POST, createRequest(exhaustedMember), String.class);
+        }
+        HttpHeaders otherMember = authHeaders(1_000_003L);
 
-        for (int i = 0; i < 6; i++) {
+        ResponseEntity<String> response = restTemplate.exchange(
+            "/api/v1/urls", HttpMethod.POST, createRequest(otherMember), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+
+    @Test
+    void doesNotLimitAnonymousRequests() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Forwarded-For", "203.0.113.30");
+
+        for (int i = 0; i < 4; i++) {
             ResponseEntity<String> response = restTemplate.exchange(
                 "/api/v1/urls", HttpMethod.POST, createRequest(headers), String.class);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         }
     }
 
-    private HttpHeaders forwardedFor(String ip) {
+    private HttpHeaders authHeaders(Long memberId) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Forwarded-For", ip);
+        headers.setBearerAuth(tokenProvider.generateAccessToken(memberId, Role.MEMBER));
         return headers;
     }
 
