@@ -14,7 +14,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 @Configuration
 class RateLimitConfig {
 
-    // 현재 유일한 사용처(익명 rate limit)의 설정값을 그대로 만료 기준으로 쓴다.
+    // 만료 버퍼일 뿐이라 여러 rate limit 사용처가 이 값 하나를 공유해도 된다 - 실제 리필 시점은 버킷 자신의 상태로 계산된다.
     @Lazy
     @Bean
     ProxyManager<byte[]> rateLimitProxyManager(

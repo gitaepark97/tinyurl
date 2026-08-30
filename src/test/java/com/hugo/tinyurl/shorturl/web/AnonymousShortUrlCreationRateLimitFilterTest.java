@@ -47,8 +47,7 @@ class AnonymousShortUrlCreationRateLimitFilterTest {
         assertThat(sixth.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
     }
 
-    // 회원용 한도(로컬 기준 분당 30회)는 MemberShortUrlCreationRateLimitFilterTest가 별도로 검증한다 -
-    // 여기선 익명 필터가 인증된 요청을 건드리지 않는지만(한도 안에서 통과) 확인한다.
+    // 회원용 한도 초과 케이스는 MemberShortUrlCreationRateLimitFilterTest가 검증한다 - 여긴 한도 안 통과만 확인.
     @Test
     void allowsAuthenticatedMemberRequestsWithinLimit() {
         HttpHeaders headers = forwardedFor("203.0.113.20");
